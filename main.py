@@ -43,21 +43,13 @@ class Dashboard():
         
         self.container = st.container(border=True)
         with self.container:
-            col4, col5, col6 = st.columns([1,1,1],gap="small")
+            col4, col5= st.columns([1,3],gap="small", vertical_alignment="center" )
             with col4:
                 self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos)
-            with col5:
                 self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses)
-            with col6:
                 self.selecao_opcoes_dependencia = st.selectbox("Dependência",options= lista_dependencias)
-        
-        self.planilha_medicao = pd.read_excel("medicao_energia.xlsx", sheet_name=self.selecao_opcoes_mes)
-        
-        col7,col8 = st.columns([1,2],gap="small")
-        
-        self.container1 = st.container()
-        with self.container1:
-            with col7:
+            self.planilha_medicao = pd.read_excel("medicao_energia.xlsx", sheet_name=self.selecao_opcoes_mes)
+            with col5:
                 try:
                     dados,soma_geral = self.info_centralizada()
                     fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, 
@@ -66,39 +58,42 @@ class Dashboard():
                     fig.update_layout(
                             title=f"Consumo geral: {soma_geral} KWh",
                             yaxis_title="Consumo",
+                            height = 300
                             )
                     st.plotly_chart(fig, use_container_width=True)
                 except Exception:
                     st.error(f"Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
-            with col8:
-                fig = go.Figure()
-                df = pd.DataFrame(self.planilha_medicao)
-                del colunas[0]
-                for i in colunas:
-                    fig.add_trace(go.Scatter(x=df["Data"],y=df[i], name=i, mode="markers+lines"))
-                fig.update_layout(
+
+        self.container1 = st.container()
+        with self.container1:
+            fig = go.Figure()
+            df = pd.DataFrame(self.planilha_medicao)
+            del colunas[0]
+            for i in colunas:
+                fig.add_trace(go.Scatter(x=df["Data"],y=df[i], name=i, mode="markers+lines"))
+            fig.update_layout(
                         title=f"Gráfico de medições",
                         yaxis_title="Medição",
                         xaxis_title="Data",
                         xaxis = dict(title="Data",range = [0,31]),
                         hovermode = "x",
                     )
-                st.plotly_chart(fig)
-            self.container2 = st.container() 
-            with self.container2:
-                dados1 = self.consumo(self.selecao_opcoes_dependencia)
-                df = pd.DataFrame(dados1)
-                fig = go.Figure(data=[go.Scatter(x=list(range(0,31,1)),y=df[self.selecao_opcoes_dependencia],mode="markers+lines",
+            st.plotly_chart(fig)
+        self.container2 = st.container() 
+        with self.container2:
+            dados1 = self.consumo(self.selecao_opcoes_dependencia)
+            df = pd.DataFrame(dados1)
+            fig = go.Figure(data=[go.Scatter(x=list(range(0,31,1)),y=df[self.selecao_opcoes_dependencia],mode="markers+lines",
                         marker=dict(size=10, symbol="circle"),
                         line=dict(width=1,color="white"))])     
-                fig.update_layout(
+            fig.update_layout(
                         title=f"Gráfico de Consumo Individualizado: {self.selecao_opcoes_dependencia}",
                         yaxis_title="Consumo",
                         xaxis = dict(title="Data",range = [0,31]),
                         plot_bgcolor = "#3bbef7",
                         hovermode = "x",
                         )
-                st.plotly_chart(fig)
+            st.plotly_chart(fig)
             
         
 
