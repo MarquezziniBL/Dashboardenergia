@@ -1,7 +1,10 @@
+import PIL.Image
 import streamlit as st
 import pandas as pd
 import numpy as np
+from streamlit_navigation_bar import st_navbar
 import plotly.graph_objects as go
+import PIL
 
 lista_anos = [2025]
 lista_meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO",
@@ -9,6 +12,7 @@ lista_meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULH
 lista_dependencias = ["HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
 
 colunas = ["Data","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
+
 
 class Dashboard():
     def consumo(self,coluna):
@@ -35,12 +39,22 @@ class Dashboard():
         for x in list(lista_somas_consumo):
             soma += x
         return list(lista_somas_consumo),soma
-    def __init__(self):
-        self.titulo_pagina = st.set_page_config(page_title="Dashboard", layout="wide")
+    def __init__(self):    
+        self.titulo_pagina = st.set_page_config(page_title="Dashboard", layout="wide",
+            initial_sidebar_state="collapsed")
+        
+        with st.sidebar:
+            st.write("Links Importantes")
+            st.page_link("https://atende.cemig.com.br/Login", label="CEMIG Login")
+        
         col1, col2, col3 = st.columns([1,2,1],gap="small")
+        with col1:
+            with st.columns(3)[1]:
+                imagem = PIL.Image.open("Img\\brasao2bfv.PNG")
+                novo_tamanho = (77,100)
+                st.image(imagem.resize(novo_tamanho))
         with col2:    
             st.header("Dashboard de Controle de Energia", anchor=False)
-        
         self.container = st.container(border=True)
         with self.container:
             col4, col5= st.columns([1,3],gap="small", vertical_alignment="center" )
