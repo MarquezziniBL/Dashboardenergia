@@ -2,7 +2,6 @@ import PIL.Image
 import streamlit as st
 import pandas as pd
 import numpy as np
-from streamlit_navigation_bar import st_navbar
 import plotly.graph_objects as go
 import PIL
 
@@ -55,6 +54,7 @@ class Dashboard():
                 st.image(imagem.resize(novo_tamanho))
         with col2:    
             st.header("Dashboard de Controle de Energia", anchor=False)
+        
         self.container = st.container(border=True)
         with self.container:
             col4, col5= st.columns([1,3],gap="small", vertical_alignment="center" )
@@ -63,7 +63,11 @@ class Dashboard():
                 self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses)
                 self.selecao_opcoes_dependencia = st.selectbox("Dependência",options= lista_dependencias)
             self.planilha_medicao = pd.read_excel("medicao_energia.xlsx", sheet_name=self.selecao_opcoes_mes)
+            df0 = pd.DataFrame(self.planilha_medicao).reindex(columns=['Bandeira','Valor'])
             with col5:
+                col6, col7, col8= st.columns([1,5,1],gap="small", vertical_alignment="center" )
+                with col7:
+                    st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : R$ {str(df0["Valor"][0]).replace(".",",")}")
                 try:
                     dados,soma_geral = self.info_centralizada()
                     fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, 
