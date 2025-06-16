@@ -96,14 +96,15 @@ class Dashboard():
         self.container2 = st.container() 
         with self.container2:
             dados1 = self.consumo(self.selecao_opcoes_dependencia)
-            df = pd.DataFrame(dados1)
-            fig = go.Figure(data=[go.Scatter(x=list(range(0,31,1)),y=df[self.selecao_opcoes_dependencia],mode="markers+lines",
+            yh = list(filter(lambda x: not np.isnan(x), dados1[self.selecao_opcoes_dependencia]))
+            df = pd.DataFrame(yh)
+            fig = go.Figure(data=[go.Scatter(x=list(range(1,31,1)),y=yh,mode="markers+lines",
                         marker=dict(size=10, symbol="circle"),
                         line=dict(width=1,color="white"))])     
             fig.update_layout(
                         title=f"Gráfico de Consumo Individualizado: {self.selecao_opcoes_dependencia}",
                         yaxis_title="Consumo",
-                        xaxis = dict(title="Data",range = [0,31]),
+                        xaxis = dict(title="Data"),
                         plot_bgcolor = "#3bbef7",
                         hovermode = "x",
                         )
