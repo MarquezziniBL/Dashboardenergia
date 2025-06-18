@@ -5,13 +5,20 @@ import numpy as np
 import plotly.graph_objects as go
 import PIL
 
-lista_anos = [2025]
+versao = " Versão: 1.1.4"
+
+lista_anos = [2024,2025]
+
 lista_meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO",
     "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
-lista_dependencias = ["HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
+lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
+
+lista_dependencias_cons = ["SEDE-C","HTS-C", "HTO-C", "ALQQ-C",
+    "USINA/CICRIN-C", "FADOR-C", "CIAFV 01-C", "CIAFV 02-C", "CIAFV 03-C"]
 
 colunas = ["Data","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
 
+colunas_consumo = ["Data-C","SEDE-C","HTS-C", "HTO-C", "ALQQ-C", "USINA/CICRIN-C", "FADOR-C", "CIAFV 01-C", "CIAFV 02-C", "CIAFV 03-C"]
 
 class Dashboard():
     def consumo(self,coluna):
@@ -20,9 +27,7 @@ class Dashboard():
         try:
             x = 0
             for i in df[coluna]:
-                j = df[coluna][x+1] - df[coluna][x]
-                self.dict_consumo[coluna].append(float(j))
-                x += 1
+                self.dict_consumo[coluna].append(float(i))
         except KeyError:
             pass
         return self.dict_consumo
@@ -30,14 +35,18 @@ class Dashboard():
     def info_centralizada(self):
         df = pd.DataFrame(self.planilha_medicao)
         lista_somas_consumo = []
-        for i in lista_dependencias:
+        for i in lista_dependencias_cons:
             j = list(df[i])
-            lista_sem_nan = list(filter(lambda x: not np.isnan(x), j))
-            lista_somas_consumo.append(lista_sem_nan[-1]-lista_sem_nan[0])
-        soma = 0
+            lista_sem_nan = list(filter(lambda x: not np.isnan(x) and x >= 0, j))
+            soma = 0
+            for x in lista_sem_nan:
+                soma += x
+            lista_somas_consumo.append(round(soma,0))
+        soma_total = 0
         for x in list(lista_somas_consumo):
-            soma += x
-        return list(lista_somas_consumo),soma
+            soma_total += x
+        return list(lista_somas_consumo),soma_total
+
     def __init__(self):    
         self.titulo_pagina = st.set_page_config(page_title="Dashboard", layout="wide",
             initial_sidebar_state="collapsed")
@@ -54,24 +63,27 @@ class Dashboard():
                 st.image(imagem.resize(novo_tamanho))
         with col2:    
             st.header("Dashboard de Controle de Energia", anchor=False)
+            col4, col5, col6 = st.columns([1,2,1],gap="small")
+            with col5:
+                st.write(versao)
         
         self.container = st.container(border=True)
         with self.container:
-            col4, col5= st.columns([1,3],gap="small", vertical_alignment="center" )
-            with col4:
+            col7, col8= st.columns([1,3],gap="small", vertical_alignment="center" )
+            with col7:
                 self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos)
                 self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses)
                 self.selecao_opcoes_dependencia = st.selectbox("Dependência",options= lista_dependencias)
-            self.planilha_medicao = pd.read_excel("medicao_energia.xlsx", sheet_name=self.selecao_opcoes_mes)
+            self.planilha_medicao = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=self.selecao_opcoes_mes)
             df0 = pd.DataFrame(self.planilha_medicao).reindex(columns=['Bandeira','Valor'])
-            with col5:
-                col6, col7, col8= st.columns([1,5,1],gap="small", vertical_alignment="center" )
-                with col7:
+            with col8:
+                col9, col10, col11= st.columns([1,5,1],gap="small", vertical_alignment="center" )
+                with col10:
                     st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : R$ {str(df0["Valor"][0]).replace(".",",")}")
                 try:
                     dados,soma_geral = self.info_centralizada()
                     fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, 
-                        marker_color =["red","blue","green","yellow","gray", "orange","white","purple"],
+                        marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
                         text=dados)])
                     fig.update_layout(
                             title=f"Consumo geral: {soma_geral} KWh",
@@ -97,10 +109,11 @@ class Dashboard():
                         hovermode = "x",
                     )
             st.plotly_chart(fig)
+            
         self.container2 = st.container() 
         with self.container2:
-            dados1 = self.consumo(self.selecao_opcoes_dependencia)
-            yh = list(filter(lambda x: not np.isnan(x), dados1[self.selecao_opcoes_dependencia]))
+            dados1 = self.consumo(self.selecao_opcoes_dependencia+"-C")
+            yh = list(filter(lambda x: not np.isnan(x) and x >= 0, dados1[self.selecao_opcoes_dependencia+"-C"]))
             df = pd.DataFrame(yh)
             fig = go.Figure(data=[go.Scatter(x=list(range(1,31,1)),y=yh,mode="markers+lines",
                         marker=dict(size=10, symbol="circle"),
@@ -113,8 +126,5 @@ class Dashboard():
                         hovermode = "x",
                         )
             st.plotly_chart(fig)
-            
-        
-
 if __name__=="__main__":
     Dashboard()
