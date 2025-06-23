@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import PIL
+import calendar
 
 versao = " Versão: 1.1.5"
 
@@ -45,6 +46,10 @@ class Dashboard():
         soma_total = 0
         for x in list(lista_somas_consumo):
             soma_total += x
+        data = calendar.monthcalendar(2025,6)
+        data0 = calendar.month(2025,6)
+        
+        print(data0, data)
         return list(lista_somas_consumo),soma_total
 
     def __init__(self):    
@@ -116,12 +121,12 @@ class Dashboard():
             dados1 = self.consumo(self.selecao_opcoes_dependencia+"-C")
             yh = list(filter(lambda x: not np.isnan(x) and x >= 0, dados1[self.selecao_opcoes_dependencia+"-C"]))
             df = pd.DataFrame(yh)
-            fig = go.Figure(data=[go.Scatter(x=list(range(1,31,1)),y=yh,mode="markers+lines",
+            fig = go.Figure(data=[go.Scatter(x=np.arange(start=1,stop=31,step=1),y=yh,mode="markers+lines",
                         marker=dict(size=10, symbol="circle"),
                         line=dict(width=1,color="white"))])     
             fig.update_layout(
                         title=f"Gráfico de Consumo Individualizado: {self.selecao_opcoes_dependencia}",
-                        yaxis_title="Consumo",
+                        yaxis = dict(title="Consumo", tickformat='.0f'),
                         xaxis = dict(title="Data"),
                         plot_bgcolor = "#3bbef7",
                         hovermode = "x",
