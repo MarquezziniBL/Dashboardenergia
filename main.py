@@ -5,7 +5,7 @@ import numpy as np
 import plotly.graph_objects as go
 import PIL
 
-versao = " Versão: 1.1.4"
+versao = " Versão: 1.1.5"
 
 lista_anos = [2024,2025]
 
@@ -53,6 +53,7 @@ class Dashboard():
         
         with st.sidebar:
             st.write("Links Importantes")
+            st.page_link("https://www.cemig.com.br", label="CEMIG")
             st.page_link("https://atende.cemig.com.br/Login", label="CEMIG Login")
         
         col1, col2, col3 = st.columns([1,2,1],gap="small")
