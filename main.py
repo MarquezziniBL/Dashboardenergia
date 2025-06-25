@@ -4,9 +4,8 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import PIL
-import calendar
 
-versao = " Versão: 1.1.5"
+versao = " Versão: 1.2.6"
 
 lista_anos = [2024,2025]
 
@@ -14,43 +13,43 @@ lista_meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULH
     "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
 
-lista_dependencias_cons = ["SEDE-C","HTS-C", "HTO-C", "ALQQ-C",
-    "USINA/CICRIN-C", "FADOR-C", "CIAFV 01-C", "CIAFV 02-C", "CIAFV 03-C"]
-
-colunas = ["Data","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
-
-colunas_consumo = ["Data-C","SEDE-C","HTS-C", "HTO-C", "ALQQ-C", "USINA/CICRIN-C", "FADOR-C", "CIAFV 01-C", "CIAFV 02-C", "CIAFV 03-C"]
+colunas = ["Data","SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
 
 class Dashboard():
     def consumo(self,coluna):
-        df = pd.DataFrame(self.planilha_medicao, columns=[coluna])
-        self.dict_consumo = {coluna:[]}
-        try:
-            x = 0
-            for i in df[coluna]:
-                self.dict_consumo[coluna].append(float(i))
-        except KeyError:
-            pass
-        return self.dict_consumo
+        df = pd.DataFrame(self.planilha_medicao, columns=[coluna+"-HFP", coluna+"-HP"])
+        self.lista_hfp = []
+        self.lista_hp = []
+        self.lista_soma = []
+        
+        for i,j in zip(df[coluna+"-HFP"], df[coluna+"-HP"]):
+            if  i < 0:
+                i = 0
+            if j < 0:
+                j = 0
+            self.lista_hfp.append(float(f"{i:.0f}"))
+            self.lista_hp.append(float(f"{j:.0f}"))
+            self.lista_soma.append(float(f"{i:.0f}")+float(f"{j:.0f}"))
+        
+
+        return self.lista_hfp, self.lista_hp, self.lista_soma
         
     def info_centralizada(self):
         df = pd.DataFrame(self.planilha_medicao)
         lista_somas_consumo = []
-        for i in lista_dependencias_cons:
-            j = list(df[i])
-            lista_sem_nan = list(filter(lambda x: not np.isnan(x) and x >= 0, j))
-            soma = 0
-            for x in lista_sem_nan:
-                soma += x
-            lista_somas_consumo.append(round(soma,0))
+        colunas.remove("Data")
+        for i in colunas:
+            x = df[i+"-HP"]
+            y = df[i+"-HFP"]
+            res = sum(filter(lambda x: not np.isnan(x) and x >= 0, x))+sum(filter(lambda x: not np.isnan(x) and x >= 0, y))
+            lista_somas_consumo.append(float(f"{res:.0f}"))
+
+        
         soma_total = 0
         for x in list(lista_somas_consumo):
             soma_total += x
-        data = calendar.monthcalendar(2025,6)
-        data0 = calendar.month(2025,6)
         
-        print(data0, data)
-        return list(lista_somas_consumo),soma_total
+        return lista_somas_consumo, soma_total
 
     def __init__(self):    
         self.titulo_pagina = st.set_page_config(page_title="Dashboard", layout="wide",
@@ -118,17 +117,18 @@ class Dashboard():
             
         self.container2 = st.container() 
         with self.container2:
-            dados1 = self.consumo(self.selecao_opcoes_dependencia+"-C")
-            yh = list(filter(lambda x: not np.isnan(x) and x >= 0, dados1[self.selecao_opcoes_dependencia+"-C"]))
-            df = pd.DataFrame(yh)
-            fig = go.Figure(data=[go.Scatter(x=np.arange(start=1,stop=31,step=1),y=yh,mode="markers+lines",
-                        marker=dict(size=10, symbol="circle"),
-                        line=dict(width=1,color="white"))])     
+            l_hfp,l_hp,l_soma = self.consumo(self.selecao_opcoes_dependencia)
+            
+            barra1 = go.Bar(x=list(range(1,31,1)), y=l_hfp, name="HFP", marker_color = "#00a2ff")
+            barra2 = go.Bar(x=list(range(1,31,1)), y=l_hp, name = "HP", marker_color = "#ff6600")
+            linha_soma = go.Scatter(x=list(range(1,31,1)), y=l_soma, name="HFP + HP" ,mode="markers+lines", 
+                marker=dict(size=6, symbol="circle"), line=dict(width=3,color="red"))
+            fig = go.Figure(data=[barra1,barra2,linha_soma])
             fig.update_layout(
                         title=f"Gráfico de Consumo Individualizado: {self.selecao_opcoes_dependencia}",
                         yaxis = dict(title="Consumo", tickformat='.0f'),
                         xaxis = dict(title="Data"),
-                        plot_bgcolor = "#3bbef7",
+                        plot_bgcolor = "#b6d5ee",
                         hovermode = "x",
                         )
             st.plotly_chart(fig)
