@@ -7,8 +7,8 @@ import plotly.io as pio
 import PIL
 import google.generativeai as genai
 
-chave_api = "AIzaSyAuhxuN3Uh0GVR-rQ5ztmGOLRy8znq8GuY"
-genai.configure(api_key=chave_api)
+
+genai.configure(api_key="")
 modelo_ai = genai.GenerativeModel('gemini-1.5-flash')
 
 versao = " Versão: 1.2.6"
