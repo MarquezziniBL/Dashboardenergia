@@ -11,7 +11,7 @@ import google.generativeai as genai
 genai.configure(api_key="")
 modelo_ai = genai.GenerativeModel('gemini-1.5-flash')
 
-versao = " Versão: 1.2.6"
+versao = " Versão: 1.2.8"
 
 lista_anos = [2024,2025]
 
@@ -23,7 +23,8 @@ colunas = ["Data","SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 0
 
 class Dashboard():
     def analise_gemma (self):
-        self.container3.write("Em implementação")
+        self.container4.markdown(f"<div style='text-align: left;'> Média de consumo diário: {float(sum((self.l_soma))/len(self.l_soma)):0.2f} KWh</div>", unsafe_allow_html=True)
+        self.container4.write("Em implementação")
     def consumo(self,coluna):
         df = pd.DataFrame(self.planilha_medicao, columns=[coluna+"-HFP", coluna+"-HP"])
         self.lista_hfp = []
@@ -40,7 +41,7 @@ class Dashboard():
             self.lista_soma.append(float(f"{i:.0f}")+float(f"{j:.0f}"))
         
 
-        return list(filter(lambda x: not np.isnan(x), self.lista_hfp)), list(filter(lambda x: not np.isnan(x), self.lista_hp)), self.lista_soma
+        return list(filter(lambda x: not np.isnan(x), self.lista_hfp)), list(filter(lambda x: not np.isnan(x), self.lista_hp)), list(filter(lambda x: not np.isnan(x), self.lista_soma))
         
     def info_centralizada(self):
         df = pd.DataFrame(self.planilha_medicao)
@@ -125,13 +126,14 @@ class Dashboard():
             
         self.container2 = st.container() 
         with self.container2:
-            l_hfp,l_hp,l_soma = self.consumo(self.selecao_opcoes_dependencia)
+            self.l_hfp,self.l_hp,self.l_soma = self.consumo(self.selecao_opcoes_dependencia)
             col12,col13 = st.columns([6,1],gap="small", vertical_alignment="center" )
             
             with col12:
-                barra1 = go.Bar(x=list(range(1,31,1)), y=l_hfp, name="HFP", marker_color = "#00a2ff")
-                barra2 = go.Bar(x=list(range(1,31,1)), y=l_hp, name = "HP", marker_color = "#ff6600")
-                linha_soma = go.Scatter(x=list(range(1,31,1)), y=l_soma, name="HFP + HP" ,mode="markers+lines", 
+                
+                barra1 = go.Bar(x=list(range(1,31,1)), y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
+                barra2 = go.Bar(x=list(range(1,31,1)), y=self.l_hp, name = "HP", marker_color = "#ff6600")
+                linha_soma = go.Scatter(x=list(range(1,31,1)), y=self.l_soma, name="HFP + HP" ,mode="markers+lines", 
                     marker=dict(size=6, symbol="circle"), line=dict(width=3,color="red"))
                 self.fig2 = go.Figure(data=[barra1,barra2,linha_soma])
                 self.fig2.update_layout(
@@ -144,15 +146,15 @@ class Dashboard():
                 st.plotly_chart(self.fig2)
                 st.button("Análise", on_click= self.analise_gemma)
             with col13:
-                pizza1 = go.Pie(labels=["",""],values=[sum(l_hfp), sum(l_hp)], showlegend=False,
+                pizza1 = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
                             title="Percentual HFP x HP")
                 fig_pizza1 = go.Figure(data=[pizza1])
                 fig_pizza1.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
                     line = dict(color = "#13293D", width=2)), textfont_size = 16)
                 
                 st.plotly_chart(fig_pizza1)
-        self.container3 = st.container() 
-        with self.container3:
-            st.write()
+            self.container4 = st.container() 
+            with self.container4:
+                st.write()
 if __name__=="__main__":
     Dashboard()
