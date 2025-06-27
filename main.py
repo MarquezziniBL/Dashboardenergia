@@ -7,24 +7,56 @@ import plotly.io as pio
 import PIL
 import google.generativeai as genai
 
+from datetime import date
+
 
 genai.configure(api_key="")
 modelo_ai = genai.GenerativeModel('gemini-1.5-flash')
 
-versao = " Versão: 1.2.8"
+versao = " Versão: 1.3.9"
 
 lista_anos = [2024,2025]
 
 lista_meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO",
     "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
-
+dict_dias_semana = {"0":"Seg","1":"Ter","2":"Qua","3":"Qui","4":"Sex","5":"Sáb","6":"Dom"}
 colunas = ["Data","SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
 
 class Dashboard():
+    def dias_semana (self,dicicionario):
+            l_dias_semana = []
+            try:
+                for i in dicicionario:
+                    data_editar = str(i).replace(" 00:00:00","")
+                            
+                    l_data= data_editar.split(sep ="-",maxsplit=3)
+                    ano,mes,dia = l_data[0],l_data[len(l_data)//2],l_data[-1]
+                    data = date(int(ano),int(mes),int(dia))
+                    num = str(data.weekday())
+                    edit = dict_dias_semana[num]
+                    l_dias_semana.append( edit + "," + dia)
+            except ValueError:
+                pass
+            return l_dias_semana
     def analise_gemma (self):
-        self.container4.markdown(f"<div style='text-align: left;'> Média de consumo diário: {float(sum((self.l_soma))/len(self.l_soma)):0.2f} KWh</div>", unsafe_allow_html=True)
-        self.container4.write("Em implementação")
+        try:
+            total = (f"{float(sum(self.l_soma)):0.2f}").replace(".",",")
+            hp = (f"{float(sum(self.l_hp)):0.2f}").replace(".",",")
+            hfp = (f"{float(sum(self.l_hfp)):0.2f}").replace(".",",")
+            media_mensal = (f"{float(sum((self.l_soma))/len(self.l_soma)):0.2f}").replace(".",",")
+            
+            if st.session_state["check"]:
+                st.session_state["test"] = True
+                self.container4.write(f"Análise de consumo da(o):  {self.selecao_opcoes_dependencia}")
+                self.container4.write(f"Total: {total} KWh -  dividido em HP = {hp} e HFP = {hfp}")
+                self.container4.write(f"Média mensal: {media_mensal} KWh")
+                self.container4.write("Em implementação")
+            else:
+                st.session_state["test"] = False
+                self.container4.write()
+        except ZeroDivisionError:
+                pass
     def consumo(self,coluna):
         df = pd.DataFrame(self.planilha_medicao, columns=[coluna+"-HFP", coluna+"-HP"])
         self.lista_hfp = []
@@ -41,8 +73,7 @@ class Dashboard():
             self.lista_soma.append(float(f"{i:.0f}")+float(f"{j:.0f}"))
         
 
-        return list(filter(lambda x: not np.isnan(x), self.lista_hfp)), list(filter(lambda x: not np.isnan(x), self.lista_hp)), list(filter(lambda x: not np.isnan(x), self.lista_soma))
-        
+        return list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_hfp)), list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_hp)), list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_soma))   
     def info_centralizada(self):
         df = pd.DataFrame(self.planilha_medicao)
         lista_somas_consumo = []
@@ -131,9 +162,11 @@ class Dashboard():
             
             with col12:
                 
-                barra1 = go.Bar(x=list(range(1,31,1)), y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
-                barra2 = go.Bar(x=list(range(1,31,1)), y=self.l_hp, name = "HP", marker_color = "#ff6600")
-                linha_soma = go.Scatter(x=list(range(1,31,1)), y=self.l_soma, name="HFP + HP" ,mode="markers+lines", 
+                lista_x = self.dias_semana(df["Data"])
+                
+                barra1 = go.Bar(x=lista_x, y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
+                barra2 = go.Bar(x=lista_x, y=self.l_hp, name = "HP", marker_color = "#ff6600")
+                linha_soma = go.Scatter(x=lista_x, y=self.l_soma, name="HFP + HP" ,mode="markers+lines", 
                     marker=dict(size=6, symbol="circle"), line=dict(width=3,color="red"))
                 self.fig2 = go.Figure(data=[barra1,barra2,linha_soma])
                 self.fig2.update_layout(
@@ -144,7 +177,13 @@ class Dashboard():
                             hovermode = "x",
                             )
                 st.plotly_chart(self.fig2)
-                st.button("Análise", on_click= self.analise_gemma)
+                
+                if "test" not in st.session_state:
+                    st.session_state["test"] = False
+                self.analise_cons_ind = st.checkbox("Análise", value=st.session_state["test"],
+                    key="check", on_change= self.analise_gemma)
+                
+                
             with col13:
                 pizza1 = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
                             title="Percentual HFP x HP")
