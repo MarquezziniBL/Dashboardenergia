@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import PIL
 import google.generativeai as genai
-
 from datetime import date
 
 
@@ -140,12 +139,14 @@ class Dashboard():
                     st.error(f"Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
 
         self.container1 = st.container()
+        
         with self.container1:
             fig = go.Figure()
             df = pd.DataFrame(self.planilha_medicao)
+            lista_x = self.dias_semana(df["Data"])
             del colunas[0]
             for i in colunas:
-                fig.add_trace(go.Scatter(x=df["Data"],y=df[i], name=i, mode="markers+lines"))
+                fig.add_trace(go.Scatter(x=lista_x,y=df[i], name=i, mode="markers+lines"))
             fig.update_layout(
                         title=f"Gráfico de medições",
                         yaxis_title="Medição",
@@ -162,7 +163,7 @@ class Dashboard():
             
             with col12:
                 
-                lista_x = self.dias_semana(df["Data"])
+                
                 
                 barra1 = go.Bar(x=lista_x, y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
                 barra2 = go.Bar(x=lista_x, y=self.l_hp, name = "HP", marker_color = "#ff6600")
