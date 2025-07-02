@@ -123,7 +123,7 @@ class Dashboard():
                     f"Total: R$ {tvma} - dividido em HFP =  {v_hfp_mes_atual} e HP =  {v_hp_mes_atual}",
                     " <div style='text-align: center'> Comparativos </div>"," ",
                     f" Total:",
-                    f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant}, Variação de {vari}%"
+                    f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}%"
                     ]
                 
                 for i in l_analises:
