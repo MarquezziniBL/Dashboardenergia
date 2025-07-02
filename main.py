@@ -98,8 +98,8 @@ class Dashboard():
             else:
                 variacao = ((total_mes_atual/total_mes_ant)-1)*100
             
-            hfp_mes_atual = (f"{float(sum(self.l_hp)):.0f}")
-            hp_mes_atual = (f"{float(sum(self.l_hfp)):.0f}")
+            hp_mes_atual = (f"{float(sum(self.l_hp)):.0f}")
+            hfp_mes_atual = (f"{float(sum(self.l_hfp)):.0f}")
             v_hfp_mes_atual = (f"{float(lista_valores[0]):.2f}").replace(".",",")
             v_hp_mes_atual = (f"{float(lista_valores[1]):.2f}").replace(".",",")
             media_mensal_mes_atual = (f"{float(sum((self.l_soma))/len(self.l_soma)):.0f}")
@@ -116,7 +116,7 @@ class Dashboard():
                     f" Análise de dados da(o) {self.selecao_opcoes_dependencia}",
                     " <div style='text-align: center'> Mês Atual </div>"," ",
                     "Consumo",
-                    f" Total:  {tcma} KWh -  dividido em HP = {hp_mes_atual} KWh e HFP = {hfp_mes_atual} KWh",
+                    f" Total:  {tcma} KWh -  dividido em HFP = {hfp_mes_atual} KWh e HP = {hp_mes_atual} KWh",
                     f" Maior Consumo:  {valor_max_total_mes_atual} KWh e Menor Consumo: {valor_min_total_mes_atual} KWh",
                     f" Média Mensal:  {media_mensal_mes_atual} KWh",
                     "Custo",
