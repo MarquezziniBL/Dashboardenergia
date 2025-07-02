@@ -68,9 +68,27 @@ class Dashboard():
             self.lista_soma.append(float(f"{i:.0f}")+float(f"{j:.0f}"))
 
         return list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_hfp)), list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_hp)), list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_soma))   
-    def analise_gemma (self):
+    def valores(self,coluna):
+        l_gasto = []
+        self.planilha_gasto = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name="GASTOMENSAL")
+        df1 = pd.DataFrame(self.planilha_gasto, columns=[coluna+"-HFP", coluna+"-HP"])
         
+        dict_meses = {"JANEIRO":[df1[coluna+"-HFP"][0],df1[coluna+"-HP"][0]], "FEVEREIRO":[df1[coluna+"-HFP"][1],df1[coluna+"-HP"][1]],
+            "MARÇO":[df1[coluna+"-HFP"][2],df1[coluna+"-HP"][2]], "ABRIL":[df1[coluna+"-HFP"][3],df1[coluna+"-HP"][3]],
+            "MAIO":[df1[coluna+"-HFP"][4],df1[coluna+"-HP"][4]], "JUNHO":[df1[coluna+"-HFP"][5],df1[coluna+"-HP"][5]],
+            "JULHO":[df1[coluna+"-HFP"][6],df1[coluna+"-HP"][6]], "AGOSTO":[df1[coluna+"-HFP"][7],df1[coluna+"-HP"][7]], 
+            "SETEMBRO":[df1[coluna+"-HFP"][8],df1[coluna+"-HP"][8]],"OUTUBRO":[df1[coluna+"-HFP"][9],df1[coluna+"-HP"][9]], 
+            "NOVEMBRO":[df1[coluna+"-HFP"][10],df1[coluna+"-HP"][10]], "DEZEMBRO":[df1[coluna+"-HFP"][11],df1[coluna+"-HP"][11]]}
+        for i in dict_meses[self.selecao_opcoes_mes]:
+            if np.isnan(i):
+                i = 0
+            l_gasto.append(i)
+        return l_gasto
+    def analise_gemma (self):
         l_hfp_mes_ant,l_hp_mes_ant,l_soma_mes_ant = self.consumo("analise",self.selecao_opcoes_dependencia)
+        lista_valores = self.valores(self.selecao_opcoes_dependencia)
+
+        
         try:
             total_mes_atual = float(sum(self.l_soma))
             total_mes_ant = float(sum(l_soma_mes_ant))
@@ -80,26 +98,32 @@ class Dashboard():
             else:
                 variacao = ((total_mes_atual/total_mes_ant)-1)*100
             
-            hp_mes_atual = (f"{float(sum(self.l_hp)):.0f}").replace(".",",")
-            hfp_mes_atual = (f"{float(sum(self.l_hfp)):.0f}").replace(".",",")
-            media_mensal_mes_atual = (f"{float(sum((self.l_soma))/len(self.l_soma)):.0f}").replace(".",",")
-            valor_max_total_mes_atual = (f"{max(self.l_soma):.0f}").replace(".",",")
-            valor_min_total_mes_atual = (f"{min(self.l_soma):.0f}").replace(".",",")
+            hfp_mes_atual = (f"{float(sum(self.l_hp)):.0f}")
+            hp_mes_atual = (f"{float(sum(self.l_hfp)):.0f}")
+            v_hfp_mes_atual = (f"{float(lista_valores[0]):.2f}").replace(".",",")
+            v_hp_mes_atual = (f"{float(lista_valores[1]):.2f}").replace(".",",")
+            media_mensal_mes_atual = (f"{float(sum((self.l_soma))/len(self.l_soma)):.0f}")
+            valor_max_total_mes_atual = (f"{max(self.l_soma):.0f}")
+            valor_min_total_mes_atual = (f"{min(self.l_soma):.0f}")
             
-            tma = (f"{(total_mes_atual):.0f}").replace(".",",")
-            tmant = (f"{(total_mes_ant):.0f}").replace(".",",")
-            vari = (f"{(variacao):.0f}").replace(".",",")
+            tcma = (f"{(total_mes_atual):.0f}")
+            tcmant = (f"{(total_mes_ant):.0f}")
+            tvma = (f"{(sum(lista_valores)):.2f}").replace(".",",")
+            vari = (f"{(variacao):.0f}")
             if st.session_state["check"]:
                 st.session_state["test"] = True
                 l_analises = [
-                    f" Análise de consumo da(o) {self.selecao_opcoes_dependencia}",
+                    f" Análise de dados da(o) {self.selecao_opcoes_dependencia}",
                     " <div style='text-align: center'> Mês Atual </div>"," ",
-                    f" Total:  {tma} KWh -  dividido em HP = {hp_mes_atual} e HFP = {hfp_mes_atual}",
+                    "Consumo",
+                    f" Total:  {tcma} KWh -  dividido em HP = {hp_mes_atual} KWh e HFP = {hfp_mes_atual} KWh",
                     f" Maior Consumo:  {valor_max_total_mes_atual} KWh e Menor Consumo: {valor_min_total_mes_atual} KWh",
                     f" Média Mensal:  {media_mensal_mes_atual} KWh",
+                    "Custo",
+                    f"Total: R$ {tvma} - dividido em HFP =  {v_hfp_mes_atual} e HP =  {v_hp_mes_atual}",
                     " <div style='text-align: center'> Comparativos </div>"," ",
                     f" Total:",
-                    f"  1) Mês atual =  {tma} KWh -  Mês anterior = {tmant}, Variação de {vari}%"
+                    f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant}, Variação de {vari}%"
                     ]
                 
                 for i in l_analises:
@@ -235,6 +259,7 @@ class Dashboard():
             self.container5 = st.container(key="container_cinco") 
             with self.container5:
                 st.write()
+        
         self.local_css(pathlib.Path("assets//style.css"))
 if __name__=="__main__":
     Dashboard()
