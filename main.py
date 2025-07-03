@@ -214,7 +214,7 @@ class Dashboard():
                         xaxis = dict(title="Data",range = [0,31]),
                         hovermode = "x"
                     )
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
             
         self.container2 = st.container(key="container_dois") 
         with self.container2:
@@ -228,7 +228,7 @@ class Dashboard():
                     marker=dict(size=6, symbol="circle"), line=dict(width=3,color="red"))
                 self.fig2 = go.Figure(data=[barra1,barra2,linha_soma])
                 self.fig2.update_layout(
-                            title={"text":f"Gráfico de Consumo Individualizado: {self.selecao_opcoes_dependencia}",
+                            title={"text":f"Consumo diário de {str(self.selecao_opcoes_mes).lower()}: {self.selecao_opcoes_dependencia}",
                                 "x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
                             yaxis = dict(title="Consumo", tickformat='.0f'),
                             xaxis = dict(title="Data"),
@@ -236,7 +236,7 @@ class Dashboard():
                             paper_bgcolor = "#006494",
                             hovermode = "x",
                             )
-                st.plotly_chart(self.fig2)
+                st.plotly_chart(self.fig2, use_container_width=True)
 
             with col13:
                 pizza1 = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
