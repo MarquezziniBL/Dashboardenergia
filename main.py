@@ -13,15 +13,15 @@ import pathlib
 genai.configure(api_key="")
 modelo_ai = genai.GenerativeModel('gemini-1.5-flash')
 
-versao = " Versão: 1.3.10"
+versao = " Versão: 1.3.14"
 
 lista_anos = [2024,2025]
 
 lista_meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO",
     "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
-lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
+lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01"]
 dict_dias_semana = {"0":"Seg","1":"Ter","2":"Qua","3":"Qui","4":"Sex","5":"Sáb","6":"Dom"}
-colunas = ["Data","SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01", "CIAFV 02", "CIAFV 03"]
+colunas = ["Data","SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01"]
 
 class Dashboard():
     def local_css(self,filename):
@@ -41,8 +41,16 @@ class Dashboard():
             except ValueError:
                 pass
             return l_dias_semana 
+    def consumo_total_dependecias(self,coluna):
+        lista_soma = []
+        self.planilha_consumo_total = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=lista_meses)
+        for i in lista_meses:
+            total = sum(filter(lambda x: not np.isnan(x),self.planilha_consumo_total[i][coluna+"-HFP"])) + sum(filter(lambda x: not np.isnan(x),self.planilha_consumo_total[i][coluna+"-HP"]))
+            lista_soma.append(float(f"{total:.0f}"))
+        return lista_soma
     def consumo(self,situacao,coluna):
         df = pd.DataFrame(self.planilha_medicao, columns=[coluna+"-HFP", coluna+"-HP"])
+        
         if situacao == "analise":
             mes_posicao = lista_meses.index(self.selecao_opcoes_mes)
             self.planilha_medicao_analise = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=lista_meses[mes_posicao-1])
@@ -201,23 +209,25 @@ class Dashboard():
 
         self.container1 = st.container(key="container_um")
         with self.container1:
-            fig = go.Figure()
-            df = pd.DataFrame(self.planilha_medicao)
-            lista_x = self.dias_semana(df["Data"])
-            del colunas[0]
-            for i in colunas:
-                fig.add_trace(go.Scatter(x=lista_x,y=df[i], name=i, mode="markers+lines"))
-            fig.update_layout(
-                        title={"text":"Gráfico de medições","x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
-                        yaxis_title="Medição",
-                        xaxis_title="Data",
-                        xaxis = dict(title="Data",range = [0,31]),
-                        hovermode = "x"
-                    )
-            st.plotly_chart(fig, use_container_width=True)
-            
+            dict_dependencias = {}
+            for i in lista_dependencias:
+                z = self.consumo_total_dependecias(i)
+                dict_dependencias[i] = z
+            fig1 = go.Figure()
+            for i in lista_dependencias:
+                fig1.add_trace(go.Scatter(x=lista_meses,y=dict_dependencias[i], name=i, mode="markers"))
+            fig1.update_layout(
+                            title={"text":"Consumo anual das dependências","x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
+                            yaxis_title="Consumo",
+                            xaxis_title="Data",
+                            xaxis = dict(title="Meses"),
+                            hovermode = "x"
+                        )
+            st.plotly_chart(fig1, use_container_width=True)
         self.container2 = st.container(key="container_dois") 
         with self.container2:
+            df2 = pd.DataFrame(self.planilha_medicao)
+            lista_x = self.dias_semana(df2["Data"])
             self.l_hfp,self.l_hp,self.l_soma = self.consumo("normal",self.selecao_opcoes_dependencia)
             
             col12,col13 = st.columns([6,1],gap="small", vertical_alignment="center" )
@@ -248,6 +258,7 @@ class Dashboard():
                     paper_bgcolor = "#006494",
                 )
                 st.plotly_chart(fig_pizza1)
+                
             
             self.container4 = st.container(key="container_quatro")
             with self.container4:
@@ -259,7 +270,21 @@ class Dashboard():
             self.container5 = st.container(key="container_cinco") 
             with self.container5:
                 st.write()
-        
+            
+            self.container6 = st.container(key="container_seis")
+            with self.container6:
+                fig6 = go.Figure()
+                del colunas[0]
+                for i in colunas:
+                    fig6.add_trace(go.Scatter(x=lista_x,y=df2[i], name=i, mode="markers+lines"))
+                fig6.update_layout(
+                            title={"text":"Gráfico de medições","x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
+                            yaxis_title="Medição",
+                            xaxis_title="Data",
+                            xaxis = dict(title="Data",range = [0,31]),
+                            hovermode = "x"
+                        )
+                #st.plotly_chart(fig6, use_container_width=True)
         self.local_css(pathlib.Path("assets//style.css"))
 if __name__=="__main__":
     Dashboard()
