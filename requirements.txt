@@ -1,11 +1,18 @@
-pip
+
 numpy
 pandas
-plotly
+plotly.graph_objects
+plotly.io
 streamlit
 openpyxl
 streamlit_navigation_bar
 pillow
+datetime
+pathlib
 locale
+
+
+
+
 
 
