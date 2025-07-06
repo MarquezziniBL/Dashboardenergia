@@ -1,10 +1,9 @@
-pip = ">= 24.0"
+pip
 numpy
 pandas
 plotly
 streamlit
 openpyxl
-streamlit_navigation_bar
 pillow
 datetime
 pathlib
