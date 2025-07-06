@@ -6,4 +6,5 @@ openpyxl
 streamlit_navigation_bar
 pillow
 locale
+pip
 
