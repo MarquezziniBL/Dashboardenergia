@@ -1,8 +1,7 @@
 
 numpy
 pandas
-plotly.graph_objects
-plotly.io
+plotly
 streamlit
 openpyxl
 streamlit_navigation_bar
