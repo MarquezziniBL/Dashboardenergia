@@ -109,8 +109,8 @@ class Dashboard():
             v_hfp_mes_atual = locale.currency(float(lista_valores[0]), grouping=True)
             v_hp_mes_atual = locale.currency(float(lista_valores[1]), grouping=True)
             media_mensal_mes_atual = locale.format_string("%.0f",float(sum((self.l_soma))/len(self.l_soma)), grouping=True)
-            valor_max_total_mes_atual = locale.format_string("%.2f",float(max(self.l_soma)), grouping=True)
-            valor_min_total_mes_atual = locale.format_string("%.2f",float(min(self.l_soma)), grouping=True)
+            valor_max_total_mes_atual = locale.format_string("%.0f",float(max(self.l_soma)), grouping=True)
+            valor_min_total_mes_atual = locale.format_string("%.0f",float(min(self.l_soma)), grouping=True)
             
             tcma = locale.format_string("%.0f",total_mes_atual, grouping=True)
             tcmant = locale.format_string("%.0f",total_mes_ant, grouping=True)
@@ -185,14 +185,14 @@ class Dashboard():
             with col8:
                 col9, col10, col11= st.columns([1,5,1],gap="small", vertical_alignment="center" )
                 with col10:
-                    st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : R$ {str(df0["Valor"][0]).replace(".",",")}")
+                    st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : {locale.currency(df0["Valor"][0], grouping=True)}")
                 try:
                     dados,soma_geral = self.info_centralizada()
                     fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, 
                         marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
                         text=dados)])
                     fig.update_layout(
-                            title=f"Consumo geral: {soma_geral} KWh",
+                            title=f"Consumo geral: {locale.format_string("%.0f",soma_geral, grouping=True)} KWh",
                             yaxis_title="Consumo",
                             height = 300
                             )
