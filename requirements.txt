@@ -5,5 +5,5 @@ streamlit
 openpyxl
 streamlit_navigation_bar
 pillow
-google.generativeai
+locale
 
