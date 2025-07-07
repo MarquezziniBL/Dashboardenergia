@@ -5,15 +5,13 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
 import PIL
-import google.generativeai as genai
 from datetime import date
 import pathlib
+import locale
 
+locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-genai.configure(api_key="")
-modelo_ai = genai.GenerativeModel('gemini-1.5-flash')
-
-versao = " Versão: 1.3.14"
+versao = " Versão: 1.3.15"
 
 lista_anos = [2024,2025]
 
@@ -106,37 +104,32 @@ class Dashboard():
             else:
                 variacao = ((total_mes_atual/total_mes_ant)-1)*100
             
-            hp_mes_atual = (f"{float(sum(self.l_hp)):.0f}")
-            hfp_mes_atual = (f"{float(sum(self.l_hfp)):.0f}")
-            v_hfp_mes_atual = (f"{float(lista_valores[0]):.2f}").replace(".",",")
-            v_hp_mes_atual = (f"{float(lista_valores[1]):.2f}").replace(".",",")
-            media_mensal_mes_atual = (f"{float(sum((self.l_soma))/len(self.l_soma)):.0f}")
-            valor_max_total_mes_atual = (f"{max(self.l_soma):.0f}")
-            valor_min_total_mes_atual = (f"{min(self.l_soma):.0f}")
+            hp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hp)), grouping=True)
+            hfp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hfp)), grouping=True)
+            v_hfp_mes_atual = locale.currency(float(lista_valores[0]), grouping=True)
+            v_hp_mes_atual = locale.currency(float(lista_valores[1]), grouping=True)
+            media_mensal_mes_atual = locale.format_string("%.0f",float(sum((self.l_soma))/len(self.l_soma)), grouping=True)
+            valor_max_total_mes_atual = locale.format_string("%.0f",float(max(self.l_soma)), grouping=True)
+            valor_min_total_mes_atual = locale.format_string("%.0f",float(min(self.l_soma)), grouping=True)
             
-            tcma = (f"{(total_mes_atual):.0f}")
-            tcmant = (f"{(total_mes_ant):.0f}")
-            tvma = (f"{(sum(lista_valores)):.2f}").replace(".",",")
-            vari = (f"{(variacao):.0f}")
+            tcma = locale.format_string("%.0f",total_mes_atual, grouping=True)
+            tcmant = locale.format_string("%.0f",total_mes_ant, grouping=True)
+            tvma = locale.currency(sum(lista_valores), grouping=True)
+            vari = locale.format_string("%.0f%%",variacao, grouping=True)
             if st.session_state["check"]:
                 st.session_state["test"] = True
-                l_analises = [
-                    f" Análise de dados da(o) {self.selecao_opcoes_dependencia}",
-                    " <div style='text-align: center'> Mês Atual </div>"," ",
-                    "Consumo",
-                    f" Total:  {tcma} KWh -  dividido em HFP = {hfp_mes_atual} KWh e HP = {hp_mes_atual} KWh",
-                    f" Maior Consumo:  {valor_max_total_mes_atual} KWh e Menor Consumo: {valor_min_total_mes_atual} KWh",
-                    f" Média Mensal:  {media_mensal_mes_atual} KWh",
-                    "Custo",
-                    f"Total: R$ {tvma} - dividido em HFP =  {v_hfp_mes_atual} e HP =  {v_hp_mes_atual}",
-                    " <div style='text-align: center'> Comparativos </div>"," ",
-                    f" Total:",
-                    f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}%"
-                    ]
-                
-                for i in l_analises:
-                    self.container5.markdown(i,unsafe_allow_html=True)
-                    
+                self.container5.text(f" Análise de dados da(o) {self.selecao_opcoes_dependencia}")
+                self.container5.markdown(" <div style='text-align: center'> Mês Atual </div>",unsafe_allow_html=True)
+                self.container5.text("Consumo")
+                self.container5.text(f" Total:  {tcma} KWh -  dividido em HFP = {hfp_mes_atual} KWh e HP = {hp_mes_atual} KWh")
+                self.container5.text(f" Maior Consumo:  {valor_max_total_mes_atual} KWh e Menor Consumo: {valor_min_total_mes_atual} KWh")
+                self.container5.text(f" Média Mensal:  {media_mensal_mes_atual} KWh")
+                self.container5.text("Custo")
+                self.container5.text(f"Total: {tvma} - dividido em HFP = {v_hfp_mes_atual}  e HP =  {v_hp_mes_atual}") 
+                self.container5.markdown(" <div style='text-align: center'> Comparativos </div>",unsafe_allow_html=True)
+                self.container5.text("Total")
+                self.container5.text(f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}")
+
             else:
                 st.session_state["test"] = False
                 self.container5.write()
@@ -192,23 +185,26 @@ class Dashboard():
             with col8:
                 col9, col10, col11= st.columns([1,5,1],gap="small", vertical_alignment="center" )
                 with col10:
-                    st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : R$ {str(df0["Valor"][0]).replace(".",",")}")
+                    st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : {locale.currency(df0["Valor"][0], grouping=True)}")
                 try:
                     dados,soma_geral = self.info_centralizada()
                     fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, 
                         marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
                         text=dados)])
                     fig.update_layout(
-                            title=f"Consumo geral: {soma_geral} KWh",
+                            title=f"Consumo geral: {locale.format_string("%.0f",soma_geral, grouping=True)} KWh",
                             yaxis_title="Consumo",
                             height = 300
                             )
                     st.plotly_chart(fig, use_container_width=True)
+                    self.container1 = st.container(key="container_um")
+                    with self.container1:
+                        st.text(f"Sede: {locale.format_string("%.2f%%",(dados[0]/soma_geral)*100)}    HTS: {locale.format_string("%.2f%%",(dados[1]/soma_geral)*100)}    HTO: {locale.format_string("%.2f%%",(dados[2]/soma_geral)*100)}    ALQQ: {locale.format_string("%.2f%%",(dados[3]/soma_geral)*100)}    USINA/CICRIN: {locale.format_string("%.2f%%",(dados[4]/soma_geral)*100)}    FADOR: {locale.format_string("%.2f%%",(dados[5]/soma_geral)*100)}    CIAFV 01: {locale.format_string("%.2f%%",(dados[6]/soma_geral)*100)}")
                 except Exception:
                     st.error(f"Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
 
-        self.container1 = st.container(key="container_um")
-        with self.container1:
+        self.container2 = st.container(key="container_dois")
+        with self.container2:
             dict_dependencias = {}
             for i in lista_dependencias:
                 z = self.consumo_total_dependecias(i)
@@ -224,8 +220,8 @@ class Dashboard():
                             hovermode = "x"
                         )
             st.plotly_chart(fig1, use_container_width=True)
-        self.container2 = st.container(key="container_dois") 
-        with self.container2:
+        self.container3 = st.container(key="container_tres") 
+        with self.container3:
             df2 = pd.DataFrame(self.planilha_medicao)
             lista_x = self.dias_semana(df2["Data"])
             self.l_hfp,self.l_hp,self.l_soma = self.consumo("normal",self.selecao_opcoes_dependencia)
