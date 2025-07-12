@@ -11,7 +11,7 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Versão: 1.3.15"
+versao = " Versão: 1.4.16"
 
 lista_anos = [2024,2025]
 
@@ -75,7 +75,10 @@ class Dashboard():
 
         return list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_hfp)), list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_hp)), list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_soma))   
     def valores(self,coluna):
-        l_gasto = []
+        l_gasto_total = []
+        l_gasto_mensal_hfp = []
+        l_gasto_mensal_hp = []
+        l_gasto_soma = []
         self.planilha_gasto = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name="GASTOMENSAL")
         df1 = pd.DataFrame(self.planilha_gasto, columns=[coluna+"-HFP", coluna+"-HP"])
         
@@ -88,15 +91,23 @@ class Dashboard():
         for i in dict_meses[self.selecao_opcoes_mes]:
             if np.isnan(i):
                 i = 0
-            l_gasto.append(i)
-        return l_gasto
+            l_gasto_total.append(i)
+        for i in dict_meses.keys():
+            if np.isnan(dict_meses[i][0]):
+                dict_meses[i][0] = 0
+            if np.isnan(dict_meses[i][1]):
+                dict_meses[i][1] = 0
+            l_gasto_mensal_hfp.append(dict_meses[i][0])
+            l_gasto_mensal_hp.append(dict_meses[i][1])
+            l_gasto_soma.append(dict_meses[i][0]+dict_meses[i][1])
+        
+        return l_gasto_total, l_gasto_mensal_hfp, l_gasto_mensal_hp, l_gasto_soma
     def analise_gemma (self):
         l_hfp_mes_ant,l_hp_mes_ant,l_soma_mes_ant = self.consumo("analise",self.selecao_opcoes_dependencia)
-        lista_valores = self.valores(self.selecao_opcoes_dependencia)
-
+        lista_valores, lista_valores_hfp, lista_valores_hp,lista_valores_soma = self.valores(self.selecao_opcoes_dependencia)
         
         try:
-            total_mes_atual = float(sum(self.l_soma))
+            total_mes_atual = float(sum(self.l_consumo_soma))
             total_mes_ant = float(sum(l_soma_mes_ant))
             variacao = 0
             if total_mes_ant == 0:
@@ -108,9 +119,9 @@ class Dashboard():
             hfp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hfp)), grouping=True)
             v_hfp_mes_atual = locale.currency(float(lista_valores[0]), grouping=True)
             v_hp_mes_atual = locale.currency(float(lista_valores[1]), grouping=True)
-            media_mensal_mes_atual = locale.format_string("%.0f",float(sum((self.l_soma))/len(self.l_soma)), grouping=True)
-            valor_max_total_mes_atual = locale.format_string("%.0f",float(max(self.l_soma)), grouping=True)
-            valor_min_total_mes_atual = locale.format_string("%.0f",float(min(self.l_soma)), grouping=True)
+            media_mensal_mes_atual = locale.format_string("%.0f",float(sum((self.l_consumo_soma))/len(self.l_consumo_soma)), grouping=True)
+            valor_max_total_mes_atual = locale.format_string("%.0f",float(max(self.l_consumo_soma)), grouping=True)
+            valor_min_total_mes_atual = locale.format_string("%.0f",float(min(self.l_consumo_soma)), grouping=True)
             
             tcma = locale.format_string("%.0f",total_mes_atual, grouping=True)
             tcmant = locale.format_string("%.0f",total_mes_ant, grouping=True)
@@ -118,23 +129,23 @@ class Dashboard():
             vari = locale.format_string("%.0f%%",variacao, grouping=True)
             if st.session_state["check"]:
                 st.session_state["test"] = True
-                self.container5.text(f" Análise de dados da(o) {self.selecao_opcoes_dependencia}")
-                self.container5.markdown(" <div style='text-align: center'> Mês Atual </div>",unsafe_allow_html=True)
-                self.container5.text("Consumo")
-                self.container5.text(f" Total:  {tcma} KWh -  dividido em HFP = {hfp_mes_atual} KWh e HP = {hp_mes_atual} KWh")
-                self.container5.text(f" Maior Consumo:  {valor_max_total_mes_atual} KWh e Menor Consumo: {valor_min_total_mes_atual} KWh")
-                self.container5.text(f" Média Mensal:  {media_mensal_mes_atual} KWh")
-                self.container5.text("Custo")
-                self.container5.text(f"Total: {tvma} - dividido em HFP = {v_hfp_mes_atual}  e HP =  {v_hp_mes_atual}") 
-                self.container5.markdown(" <div style='text-align: center'> Comparativos </div>",unsafe_allow_html=True)
-                self.container5.text("Total")
-                self.container5.text(f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}")
+                self.container3_2.text(f" Análise de dados da(o) {self.selecao_opcoes_dependencia}")
+                self.container3_2.markdown(" <div style='text-align: center'> Mês Atual </div>",unsafe_allow_html=True)
+                self.container3_2.text("Consumo")
+                self.container3_2.text(f" Total:  {tcma} KWh -  dividido em HFP = {hfp_mes_atual} KWh e HP = {hp_mes_atual} KWh")
+                self.container3_2.text(f" Maior Consumo:  {valor_max_total_mes_atual} KWh e Menor Consumo: {valor_min_total_mes_atual} KWh")
+                self.container3_2.text(f" Média Mensal:  {media_mensal_mes_atual} KWh")
+                self.container3_2.text("Custo")
+                self.container3_2.text(f"Total: {tvma} - dividido em HFP = {v_hfp_mes_atual}  e HP =  {v_hp_mes_atual}") 
+                self.container3_2.markdown(" <div style='text-align: center'> Comparativos </div>",unsafe_allow_html=True)
+                self.container3_2.text("Total")
+                self.container3_2.text(f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}")
 
             else:
                 st.session_state["test"] = False
-                self.container5.write()
+                self.container3_2.write()
         except ZeroDivisionError:
-                self.container5.error(f"Dados para o mês zerados", width=500)
+                self.container3_2.error(f"Dados para o mês zerados", width=500)
     def info_centralizada(self):
         df = pd.DataFrame(self.planilha_medicao)
         lista_somas_consumo = []
@@ -224,51 +235,85 @@ class Dashboard():
         with self.container3:
             df2 = pd.DataFrame(self.planilha_medicao)
             lista_x = self.dias_semana(df2["Data"])
-            self.l_hfp,self.l_hp,self.l_soma = self.consumo("normal",self.selecao_opcoes_dependencia)
+            self.l_custo,self.l_custo_hfp,self.l_custo_hp, self.l_custo_soma = self.valores(self.selecao_opcoes_dependencia)
+            self.l_hfp,self.l_hp,self.l_consumo_soma = self.consumo("normal",self.selecao_opcoes_dependencia)
+            
+            st.markdown(f"<h3 style='text-align: center'> Dados do(a) {self.selecao_opcoes_dependencia} </h3>",unsafe_allow_html=True)
+            
             
             col12,col13 = st.columns([6,1],gap="small", vertical_alignment="center" )
             with col12:
-                barra1 = go.Bar(x=lista_x, y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
-                barra2 = go.Bar(x=lista_x, y=self.l_hp, name = "HP", marker_color = "#ff6600")
-                linha_soma = go.Scatter(x=lista_x, y=self.l_soma, name="HFP + HP" ,mode="markers+lines", 
+                barra_custo_hfp = go.Bar(x=lista_meses, y=self.l_custo_hfp, name="HFP", marker_color = "#00a2ff")
+                barra_custo_hp = go.Bar(x=lista_meses, y=self.l_custo_hp, name = "HP", marker_color = "#ff6600")
+                linha_custo_soma = go.Scatter(x=lista_meses, y=self.l_custo_soma, name="HFP + HP" ,mode="markers+lines", 
+                        marker=dict(size=6, symbol="circle"), line=dict(width=3,color="red"))
+                self.fig_custo = go.Figure(data=[barra_custo_hfp,barra_custo_hp,linha_custo_soma])
+                self.fig_custo.update_layout(
+                                title={"text":f"Custo mensal",
+                                    "x":0.1,"y":0.9,"xanchor" : "left", "yanchor":"top"},
+                                yaxis = dict(title="Custo (R$)", tickformat=',.2f', tickprefix = "R$", separatethousands =True),
+                                xaxis = dict(title="Meses"),
+                                plot_bgcolor = "#b6d5ee",
+                                paper_bgcolor = "#006494",
+                                hovermode = "x",
+                                )
+                st.plotly_chart(self.fig_custo, use_container_width=True)
+            
+            with col13:
+                pizza_custo = go.Pie(labels=["",""],values=[sum(self.l_custo_hfp), sum(self.l_custo_hp)], showlegend=False,
+                            title="Percentual HFP x HP")
+                fig_pizza_custo = go.Figure(data=[pizza_custo])
+                fig_pizza_custo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
+                    line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
+                fig_pizza_custo.update_layout(
+                    paper_bgcolor = "#006494",
+                )
+                st.plotly_chart(fig_pizza_custo, key="pizza_custo")
+            
+            
+            col14,col15 = st.columns([6,1],gap="small", vertical_alignment="center" )
+            with col14:
+                barra_consumo_hfp = go.Bar(x=lista_x, y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
+                barra_consumo_hp = go.Bar(x=lista_x, y=self.l_hp, name = "HP", marker_color = "#ff6600")
+                linha_consumo_soma = go.Scatter(x=lista_x, y=self.l_consumo_soma, name="HFP + HP" ,mode="markers+lines", 
                     marker=dict(size=6, symbol="circle"), line=dict(width=3,color="red"))
-                self.fig2 = go.Figure(data=[barra1,barra2,linha_soma])
-                self.fig2.update_layout(
-                            title={"text":f"Consumo diário de {str(self.selecao_opcoes_mes).lower()}: {self.selecao_opcoes_dependencia}",
-                                "x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
+                self.fig_consumo = go.Figure(data=[barra_consumo_hfp,barra_consumo_hp,linha_consumo_soma])
+                self.fig_consumo.update_layout(
+                            title={"text":f"Consumo diário de {str(self.selecao_opcoes_mes).lower()}",
+                                "x":0.1,"y":0.9,"xanchor" : "left", "yanchor":"top"},
                             yaxis = dict(title="Consumo", tickformat='.0f'),
                             xaxis = dict(title="Data"),
                             plot_bgcolor = "#b6d5ee",
                             paper_bgcolor = "#006494",
                             hovermode = "x",
                             )
-                st.plotly_chart(self.fig2, use_container_width=True)
+                st.plotly_chart(self.fig_consumo, use_container_width=True)
 
-            with col13:
-                pizza1 = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
+            with col15:
+                pizza_consumo = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
                             title="Percentual HFP x HP")
-                fig_pizza1 = go.Figure(data=[pizza1])
-                fig_pizza1.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
+                fig_pizza_consumo = go.Figure(data=[pizza_consumo])
+                fig_pizza_consumo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
                     line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
-                fig_pizza1.update_layout(
+                fig_pizza_consumo.update_layout(
                     paper_bgcolor = "#006494",
                 )
-                st.plotly_chart(fig_pizza1)
+                st.plotly_chart(fig_pizza_consumo, key="pizza_consumo")
                 
             
-            self.container4 = st.container(key="container_quatro")
-            with self.container4:
+            self.container3_1 = st.container(key="container_tres_um")
+            with self.container3_1:
                 if "test" not in st.session_state:
                     st.session_state["test"] = False
                 self.analise_cons_ind = st.checkbox("Análise", value=st.session_state["test"],
                     key="check", on_change= self.analise_gemma)
             
-            self.container5 = st.container(key="container_cinco") 
-            with self.container5:
+            self.container3_2 = st.container(key="container_tres_dois") 
+            with self.container3_2:
                 st.write()
             
-            self.container6 = st.container(key="container_seis")
-            with self.container6:
+            self.container3_3 = st.container(key="container_tres_tres")
+            with self.container3_3:
                 fig6 = go.Figure()
                 del colunas[0]
                 for i in colunas:
