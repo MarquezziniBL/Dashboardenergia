@@ -222,12 +222,13 @@ class Dashboard():
                 dict_dependencias[i] = z
             fig1 = go.Figure()
             for i in lista_dependencias:
-                fig1.add_trace(go.Scatter(x=lista_meses,y=dict_dependencias[i], name=i, mode="markers"))
+                fig1.add_trace(go.Scatter(x=lista_meses,y=dict_dependencias[i], name=i, mode="markers", marker = dict(size=20)))
             fig1.update_layout(
                             title={"text":"Consumo anual das dependências","x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
-                            yaxis_title="Consumo",
+                            yaxis=dict(title = "Consumo", tickformat = ',.0f'),
                             xaxis_title="Data",
                             xaxis = dict(title="Meses"),
+    
                             hovermode = "x"
                         )
             st.plotly_chart(fig1, use_container_width=True)
@@ -281,7 +282,7 @@ class Dashboard():
                 self.fig_consumo.update_layout(
                             title={"text":f"Consumo diário de {str(self.selecao_opcoes_mes).lower()}",
                                 "x":0.1,"y":0.9,"xanchor" : "left", "yanchor":"top"},
-                            yaxis = dict(title="Consumo", tickformat='.0f'),
+                            yaxis = dict(title="Consumo", tickformat=',.0f'),
                             xaxis = dict(title="Data"),
                             plot_bgcolor = "#b6d5ee",
                             paper_bgcolor = "#006494",
