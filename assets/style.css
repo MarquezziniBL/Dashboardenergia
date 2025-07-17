@@ -16,6 +16,8 @@
 }
 
 .st-key-container_tres_dois{
+    text-align: center;
+    vertical-align: top;
     background-color: rgb(0, 100, 148);
     border-radius: 5px;
     padding: 5px;

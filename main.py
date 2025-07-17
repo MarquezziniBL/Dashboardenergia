@@ -11,7 +11,7 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Versão: 1.4.16"
+versao = " Versão: 1.4.17"
 
 lista_anos = [2024,2025]
 
@@ -57,7 +57,7 @@ class Dashboard():
                     self.planilha_medicao_analise = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano-1}.xlsx", sheet_name=lista_meses[mes_posicao-1])
             except FileNotFoundError:
                 self.planilha_medicao_analise = self.planilha_medicao
-                self.container5.error(f"Não existe arquivo para {self.selecao_opcoes_ano-1}", width=500)
+                self.container3_2.error(f"Não existe arquivo para {self.selecao_opcoes_ano-1}", width=500)
             df = pd.DataFrame(self.planilha_medicao_analise, columns=[coluna+"-HFP", coluna+"-HP"])
         
         self.lista_hfp = []
@@ -127,23 +127,26 @@ class Dashboard():
             tcmant = locale.format_string("%.0f",total_mes_ant, grouping=True)
             tvma = locale.currency(sum(lista_valores), grouping=True)
             vari = locale.format_string("%.0f%%",variacao, grouping=True)
-            if st.session_state["check"]:
-                st.session_state["test"] = True
-                self.container3_2.text(f" Análise de dados da(o) {self.selecao_opcoes_dependencia}")
-                self.container3_2.markdown(" <div style='text-align: center'> Mês Atual </div>",unsafe_allow_html=True)
-                self.container3_2.text("Consumo")
-                self.container3_2.text(f" Total:  {tcma} KWh -  dividido em HFP = {hfp_mes_atual} KWh e HP = {hp_mes_atual} KWh")
-                self.container3_2.text(f" Maior Consumo:  {valor_max_total_mes_atual} KWh e Menor Consumo: {valor_min_total_mes_atual} KWh")
-                self.container3_2.text(f" Média Mensal:  {media_mensal_mes_atual} KWh")
-                self.container3_2.text("Custo")
-                self.container3_2.text(f"Total: {tvma} - dividido em HFP = {v_hfp_mes_atual}  e HP =  {v_hp_mes_atual}") 
-                self.container3_2.markdown(" <div style='text-align: center'> Comparativos </div>",unsafe_allow_html=True)
-                self.container3_2.text("Total")
-                self.container3_2.text(f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}")
-
-            else:
-                st.session_state["test"] = False
-                self.container3_2.write()
+            with self.container3_2:
+                    self.container3_2_1 = st.container(key="container_tres_dois_um") 
+                    with self.container3_2_1:
+                        st.title(f" Análise de dados da(o) {self.selecao_opcoes_dependencia}",anchor=False)
+                        st.markdown(" <div style='text-align: center'> Mês Atual </div>",unsafe_allow_html=True)
+                    self.col16,self.col17 = st.columns([1,1],gap="small", vertical_alignment="top" , border=True)
+                    with self.col16:
+                        st.text("Consumo")
+                        st.text(f" Total:  {tcma} KWh -  dividido em HFP = {hfp_mes_atual} KWh e HP = {hp_mes_atual} KWh")
+                        st.text(f" Maior Consumo:  {valor_max_total_mes_atual} KWh e Menor Consumo: {valor_min_total_mes_atual} KWh")
+                        st.text(f" Média Mensal:  {media_mensal_mes_atual} KWh")
+                    with self.col17:
+                        st.text("Custo")
+                        st.text(f"Total: {tvma} - dividido em HFP = {v_hfp_mes_atual}  e HP =  {v_hp_mes_atual}") 
+                    self.container3_2_2 = st.container(key="container_tres_dois_dois", border=True) 
+                    with self.container3_2_2:
+                        st.markdown(" <div style='text-align: center'> Comparativos </div>",unsafe_allow_html=True)
+                        st.text("Total")
+                        st.text(f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}")
+                    st.button("Fechar", on_click= lambda: self.container3_2.empty())
         except ZeroDivisionError:
                 self.container3_2.error(f"Dados para o mês zerados", width=500)
     def info_centralizada(self):
@@ -304,15 +307,9 @@ class Dashboard():
             
             self.container3_1 = st.container(key="container_tres_um")
             with self.container3_1:
-                if "test" not in st.session_state:
-                    st.session_state["test"] = False
-                self.analise_cons_ind = st.checkbox("Análise", value=st.session_state["test"],
-                    key="check", on_change= self.analise_gemma)
-            
+                st.button("Análise", on_click=self.analise_gemma)
             self.container3_2 = st.container(key="container_tres_dois") 
-            with self.container3_2:
-                st.write()
-            
+        
             self.container3_3 = st.container(key="container_tres_tres")
             with self.container3_3:
                 fig6 = go.Figure()
