@@ -101,7 +101,7 @@ class Dashboard():
             l_gasto_mensal_hp.append(dict_meses[i][1])
             l_gasto_soma.append(dict_meses[i][0]+dict_meses[i][1])
         
-        return l_gasto_total, l_gasto_mensal_hfp, l_gasto_mensal_hp, l_gasto_soma
+        return list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_total)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_mensal_hfp)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_mensal_hp)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_soma))
     def analise_gemma (self):
         l_hfp_mes_ant,l_hp_mes_ant,l_soma_mes_ant = self.consumo("analise",self.selecao_opcoes_dependencia)
         lista_valores, lista_valores_hfp, lista_valores_hp,lista_valores_soma = self.valores(self.selecao_opcoes_dependencia)
@@ -117,15 +117,15 @@ class Dashboard():
             
             hp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hp)), grouping=True)
             hfp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hfp)), grouping=True)
-            v_hfp_mes_atual = locale.currency(float(lista_valores[0]), grouping=True)
-            v_hp_mes_atual = locale.currency(float(lista_valores[1]), grouping=True)
+            v_hfp_mes_atual = locale.currency(float(self.l_custo[0]), grouping=True)
+            v_hp_mes_atual = locale.currency(float(self.l_custo[1]), grouping=True)
             media_mensal_mes_atual = locale.format_string("%.0f",float(sum((self.l_consumo_soma))/len(self.l_consumo_soma)), grouping=True)
             valor_max_total_mes_atual = locale.format_string("%.0f",float(max(self.l_consumo_soma)), grouping=True)
             valor_min_total_mes_atual = locale.format_string("%.0f",float(min(self.l_consumo_soma)), grouping=True)
             
             tcma = locale.format_string("%.0f",total_mes_atual, grouping=True)
             tcmant = locale.format_string("%.0f",total_mes_ant, grouping=True)
-            tvma = locale.currency(sum(lista_valores), grouping=True)
+            tvma = locale.currency(sum(self.l_custo), grouping=True)
             vari = locale.format_string("%.0f%%",variacao, grouping=True)
             with self.container3_2:
                     self.container3_2_1 = st.container(key="container_tres_dois_um") 
