@@ -11,7 +11,7 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Versão: 1.4.17"
+versao = " Versão: 1.4.18"
 
 lista_anos = [2024,2025]
 
@@ -79,6 +79,7 @@ class Dashboard():
         l_gasto_mensal_hfp = []
         l_gasto_mensal_hp = []
         l_gasto_soma = []
+        l_gasto_anual = []
         self.planilha_gasto = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name="GASTOMENSAL")
         df1 = pd.DataFrame(self.planilha_gasto, columns=[coluna+"-HFP", coluna+"-HP"])
         
@@ -100,33 +101,66 @@ class Dashboard():
             l_gasto_mensal_hfp.append(dict_meses[i][0])
             l_gasto_mensal_hp.append(dict_meses[i][1])
             l_gasto_soma.append(dict_meses[i][0]+dict_meses[i][1])
-        
-        return list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_total)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_mensal_hfp)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_mensal_hp)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_soma))
+        for i in dict_meses.keys():
+            l_gasto_anual.append(dict_meses[i][0]+dict_meses[i][1])
+        return list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_total)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_mensal_hfp)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_mensal_hp)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_soma)), l_gasto_anual
+    def valores_mes_ant (self,coluna):
+        self.planilha_gasto = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name="GASTOMENSAL")
+        df1 = pd.DataFrame(self.planilha_gasto, columns=[coluna+"-HFP", coluna+"-HP"])
+        if self.selecao_opcoes_mes == "JANEIRO":
+            self.planilha_gasto = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano-1}.xlsx", sheet_name="GASTOMENSAL")
+            df1 = pd.DataFrame(self.planilha_gasto, columns=[coluna+"-HFP", coluna+"-HP"])
+            st.write(df1[coluna+"-HFP"][11])
+            lista_valor_mes_ant =  [df1[coluna+"-HFP"][11],df1[coluna+"-HP"][11]]
+        else:
+            pos_mes_ant = lista_meses.index(self.selecao_opcoes_mes)-1
+            lista_valor_mes_ant =  [df1[coluna+"-HFP"][pos_mes_ant],df1[coluna+"-HP"][pos_mes_ant]]
+        return lista_valor_mes_ant
     def analise_gemma (self):
-        l_hfp_mes_ant,l_hp_mes_ant,l_soma_mes_ant = self.consumo("analise",self.selecao_opcoes_dependencia)
-        lista_valores, lista_valores_hfp, lista_valores_hp,lista_valores_soma = self.valores(self.selecao_opcoes_dependencia)
-        
         try:
-            total_mes_atual = float(sum(self.l_consumo_soma))
-            total_mes_ant = float(sum(l_soma_mes_ant))
-            variacao = 0
-            if total_mes_ant == 0:
-                variacao = 0
+            l_hfp_mes_ant,l_hp_mes_ant,l_soma_mes_ant = self.consumo("analise",self.selecao_opcoes_dependencia)
+            lista_valores_mes_ant = self.valores_mes_ant(self.selecao_opcoes_dependencia)
+            
+        
+            total_cons_mes_atual = float(sum(self.l_consumo_soma))
+            total_cons_mes_ant = float(sum(l_soma_mes_ant))
+            media_custo_anual = float(sum(self.l_custo_anual)/len(self.l_custo_anual))
+            total_custo_mes_ant = float(sum(lista_valores_mes_ant))
+            
+            variacao_cons = 0
+            variacao_custo_mensal = 0
+            variacao_custo_anual = 0
+            if total_cons_mes_ant == 0:
+                variacao_cons = 0
+            elif total_custo_mes_ant == 0:
+                variacao_custo_mensal = 0
+            elif media_custo_anual == 0:
+                variacao_custo_anual = 0
             else:
-                variacao = ((total_mes_atual/total_mes_ant)-1)*100
+                variacao_custo_mensal = ((sum(self.l_custo)/total_custo_mes_ant)-1)*100
+                variacao_cons = ((total_cons_mes_atual/total_cons_mes_ant)-1)*100
+                variacao_custo_anual = ((sum(self.l_custo)/media_custo_anual)-1)*100
+                
             
             hp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hp)), grouping=True)
             hfp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hfp)), grouping=True)
             v_hfp_mes_atual = locale.currency(float(self.l_custo[0]), grouping=True)
             v_hp_mes_atual = locale.currency(float(self.l_custo[1]), grouping=True)
+            
             media_mensal_mes_atual = locale.format_string("%.0f",float(sum((self.l_consumo_soma))/len(self.l_consumo_soma)), grouping=True)
+            media_anual = locale.currency(float(media_custo_anual), grouping=True)
             valor_max_total_mes_atual = locale.format_string("%.0f",float(max(self.l_consumo_soma)), grouping=True)
             valor_min_total_mes_atual = locale.format_string("%.0f",float(min(self.l_consumo_soma)), grouping=True)
             
-            tcma = locale.format_string("%.0f",total_mes_atual, grouping=True)
-            tcmant = locale.format_string("%.0f",total_mes_ant, grouping=True)
+            tcma = locale.format_string("%.0f",total_cons_mes_atual, grouping=True)
+            tcmant = locale.format_string("%.0f",total_cons_mes_ant, grouping=True)
+            vari = locale.format_string("%.1f%%",variacao_cons, grouping=True)
+            
+            tvma_mes_ante = locale.currency(sum(lista_valores_mes_ant), grouping=True)
             tvma = locale.currency(sum(self.l_custo), grouping=True)
-            vari = locale.format_string("%.0f%%",variacao, grouping=True)
+            vari_custo_mensal = locale.format_string("%.1f%%",variacao_custo_mensal, grouping=True)
+            vari_custo_anual = locale.format_string("%.1f%%",variacao_custo_anual, grouping=True)
+            
             with self.container3_2:
                     self.container3_2_1 = st.container(key="container_tres_dois_um") 
                     with self.container3_2_1:
@@ -141,14 +175,21 @@ class Dashboard():
                     with self.col17:
                         st.text("Custo")
                         st.text(f"Total: {tvma} - dividido em HFP = {v_hfp_mes_atual}  e HP =  {v_hp_mes_atual}") 
+                        st.text(f"Média Anual: {media_anual}") 
                     self.container3_2_2 = st.container(key="container_tres_dois_dois", border=True) 
                     with self.container3_2_2:
                         st.markdown(" <div style='text-align: center'> Comparativos </div>",unsafe_allow_html=True)
-                        st.text("Total")
+                        st.text("Consumo")
                         st.text(f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}")
+                        
+                        st.text("Custo")
+                        st.text(f"  1) Mês atual =  {tvma} -  Mês anterior = {tvma_mes_ante}, Variação de {vari_custo_mensal}")
                     st.button("Fechar", on_click= lambda: self.container3_2.empty())
         except ZeroDivisionError:
                 self.container3_2.error(f"Dados para o mês zerados", width=500)
+        except FileNotFoundError:
+            with self.container3_2:
+                st.button("Fechar", on_click= lambda: self.container3_2.empty())
     def info_centralizada(self):
         df = pd.DataFrame(self.planilha_medicao)
         lista_somas_consumo = []
@@ -239,7 +280,7 @@ class Dashboard():
         with self.container3:
             df2 = pd.DataFrame(self.planilha_medicao)
             lista_x = self.dias_semana(df2["Data"])
-            self.l_custo,self.l_custo_hfp,self.l_custo_hp, self.l_custo_soma = self.valores(self.selecao_opcoes_dependencia)
+            self.l_custo,self.l_custo_hfp,self.l_custo_hp, self.l_custo_soma, self.l_custo_anual = self.valores(self.selecao_opcoes_dependencia)
             self.l_hfp,self.l_hp,self.l_consumo_soma = self.consumo("normal",self.selecao_opcoes_dependencia)
             
             st.markdown(f"<h3 style='text-align: center'> Dados do(a) {self.selecao_opcoes_dependencia} </h3>",unsafe_allow_html=True)
