@@ -165,7 +165,7 @@ class Dashboard():
                     self.container3_2_1 = st.container(key="container_tres_dois_um") 
                     with self.container3_2_1:
                         st.title(f" Análise de dados da(o) {self.selecao_opcoes_dependencia}",anchor=False)
-                        st.markdown(" <div style='text-align: center'> Mês Atual </div>",unsafe_allow_html=True)
+                        st.markdown(f"<div style='text-align: center'> Mês Selecionado: {self.selecao_opcoes_mes} </div>",unsafe_allow_html=True)
                     self.col16,self.col17 = st.columns([1,1],gap="small", vertical_alignment="top" , border=True)
                     with self.col16:
                         st.text("Consumo")
@@ -291,7 +291,7 @@ class Dashboard():
                 barra_custo_hfp = go.Bar(x=lista_meses, y=self.l_custo_hfp, name="HFP", marker_color = "#00a2ff")
                 barra_custo_hp = go.Bar(x=lista_meses, y=self.l_custo_hp, name = "HP", marker_color = "#ff6600")
                 linha_custo_soma = go.Scatter(x=lista_meses, y=self.l_custo_soma, name="HFP + HP" ,mode="markers+lines", 
-                        marker=dict(size=6, symbol="circle"), line=dict(width=3,color="red"))
+                        marker=dict(size=8, symbol="circle", color = "red"), line=dict(width=3,color="#f15454", shape = "spline"))
                 self.fig_custo = go.Figure(data=[barra_custo_hfp,barra_custo_hp,linha_custo_soma])
                 self.fig_custo.update_layout(
                                 title={"text":f"Custo mensal",
@@ -321,7 +321,7 @@ class Dashboard():
                 barra_consumo_hfp = go.Bar(x=lista_x, y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
                 barra_consumo_hp = go.Bar(x=lista_x, y=self.l_hp, name = "HP", marker_color = "#ff6600")
                 linha_consumo_soma = go.Scatter(x=lista_x, y=self.l_consumo_soma, name="HFP + HP" ,mode="markers+lines", 
-                    marker=dict(size=6, symbol="circle"), line=dict(width=3,color="red"))
+                    marker=dict(size=6, symbol="circle", color = "red"), line=dict(width=3,color= "red"))
                 self.fig_consumo = go.Figure(data=[barra_consumo_hfp,barra_consumo_hp,linha_consumo_soma])
                 self.fig_consumo.update_layout(
                             title={"text":f"Consumo diário de {str(self.selecao_opcoes_mes).lower()}",
