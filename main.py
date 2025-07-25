@@ -11,7 +11,7 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Versão: 1.4.18"
+versao = " Versão: 1.5.19"
 
 lista_anos = [2024,2025]
 
@@ -39,6 +39,22 @@ class Dashboard():
             except ValueError:
                 pass
             return l_dias_semana 
+    def atividades_mes_atual (self, posicao):
+        try:   
+            self.planilha_atividades = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=self.selecao_opcoes_mes)
+            df_atividade = pd.DataFrame(self.planilha_atividades, columns=["","ATIVIDADES"])
+            lista_atividades = str(df_atividade["ATIVIDADES"][posicao]).split(",")
+            with self.col17:
+                x = 1
+                for i in lista_atividades:
+                    if i == "nan":
+                        st.text("SEM ATIVIDADES")
+                    else:
+                        st.text(f"{x}º - {i}")
+                    x += 1
+        except FileNotFoundError:
+                self.container3_1.error(f"ARQUIVO NÃO ENCONTRADO", width=500)
+                
     def consumo_total_dependecias(self,coluna):
         lista_soma = []
         self.planilha_consumo_total = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=lista_meses)
@@ -161,9 +177,9 @@ class Dashboard():
             vari_custo_mensal = locale.format_string("%.1f%%",variacao_custo_mensal, grouping=True)
             vari_custo_anual = locale.format_string("%.1f%%",variacao_custo_anual, grouping=True)
             
-            with self.container3_2:
-                    self.container3_2_1 = st.container(key="container_tres_dois_um") 
-                    with self.container3_2_1:
+            with self.container3_3:
+                    self.container3_3_1 = st.container(key="container_tres_dois_um") 
+                    with self.container3_3_1:
                         st.title(f" Análise de dados da(o) {self.selecao_opcoes_dependencia}",anchor=False)
                         st.markdown(f"<div style='text-align: center'> Mês Selecionado: {self.selecao_opcoes_mes} </div>",unsafe_allow_html=True)
                     self.col16,self.col17 = st.columns([1,1],gap="small", vertical_alignment="top" , border=True)
@@ -176,8 +192,8 @@ class Dashboard():
                         st.text("Custo")
                         st.text(f"Total: {tvma} - dividido em HFP = {v_hfp_mes_atual}  e HP =  {v_hp_mes_atual}") 
                         st.text(f"Média Anual: {media_anual}") 
-                    self.container3_2_2 = st.container(key="container_tres_dois_dois", border=True) 
-                    with self.container3_2_2:
+                    self.container3_3_2 = st.container(key="container_tres_dois_dois", border=True) 
+                    with self.container3_3_2:
                         st.markdown(" <div style='text-align: center'> Comparativos </div>",unsafe_allow_html=True)
                         st.text("Consumo")
                         st.text(f"  1) Mês atual =  {tcma} KWh -  Mês anterior = {tcmant} KWh, Variação de {vari}")
@@ -193,7 +209,7 @@ class Dashboard():
     def info_centralizada(self):
         df = pd.DataFrame(self.planilha_medicao)
         lista_somas_consumo = []
-        colunas.remove("Data")
+        del colunas [0]
         for i in colunas:
             x = df[i+"-HP"]
             y = df[i+"-HFP"]
@@ -345,16 +361,23 @@ class Dashboard():
                 )
                 st.plotly_chart(fig_pizza_consumo, key="pizza_consumo")
                 
-            
-            self.container3_1 = st.container(key="container_tres_um")
+            self.container3_1 = st.container(key="container_tres_um", border=True)
             with self.container3_1:
+                self.col16,self.col17 = st.columns([1,6],gap="small", vertical_alignment="top")
+                with self.col16:
+                    self.selecao_dias_semana = st.selectbox("Dia da Semana",options= lista_x,key="dias_semana")
+                    self.atividades_mes_atual(lista_x.index(self.selecao_dias_semana))
+                
+            self.container3_2 = st.container(key="container_tres_dois")
+            with self.container3_2:
                 st.button("Análise", on_click=self.analise_gemma)
-            self.container3_2 = st.container(key="container_tres_dois") 
+            
+            self.container3_3 = st.container(key="container_tres_tres") 
         
-            self.container3_3 = st.container(key="container_tres_tres")
-            with self.container3_3:
+            self.container3_4 = st.container(key="container_tres_quatro")
+            with self.container3_4:
                 fig6 = go.Figure()
-                del colunas[0]
+                del colunas [0]
                 for i in colunas:
                     fig6.add_trace(go.Scatter(x=lista_x,y=df2[i], name=i, mode="markers+lines"))
                 fig6.update_layout(
