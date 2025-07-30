@@ -204,7 +204,9 @@ class Dashboard():
                         st.text(f"  1) Mês atual =  {tvma} -  Mês anterior = {tvma_mes_ante}, Variação de {vari_custo_mensal}")
                     st.button("Fechar", on_click= lambda: self.container3_2.empty())
         except ZeroDivisionError:
-                self.container3_2.error(f"Dados para o mês zerados", width=500)
+            self.container3_2.error(f"Dados para o mês zerados", width=500)
+            with self.container3_2:
+                st.button("Fechar", on_click= lambda: self.container3_2.empty())
         except FileNotFoundError:
             with self.container3_2:
                 st.button("Fechar", on_click= lambda: self.container3_2.empty())
