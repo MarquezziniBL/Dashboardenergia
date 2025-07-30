@@ -157,7 +157,9 @@ class Dashboard():
                 variacao_cons = ((total_cons_mes_atual/total_cons_mes_ant)-1)*100
                 variacao_custo_anual = ((sum(self.l_custo)/media_custo_anual)-1)*100
                 
-            
+            if not self.l_custo:
+                self.l_custo = [0,0]
+                
             hp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hp)), grouping=True)
             hfp_mes_atual = locale.format_string("%.0f",float(sum(self.l_hfp)), grouping=True)
             v_hfp_mes_atual = locale.currency(float(self.l_custo[0]), grouping=True)
