@@ -89,7 +89,7 @@ class Dashboard():
             self.lista_hp.append(float(f"{j:.0f}"))
             self.lista_soma.append(float(f"{i:.0f}")+float(f"{j:.0f}"))
 
-        return list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_hfp)), list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_hp)), list(filter(lambda x: not np.isnan(x) and x > 0, self.lista_soma))   
+        return list(filter(lambda x: not np.isnan(x), self.lista_hfp)), list(filter(lambda x: not np.isnan(x), self.lista_hp)), list(filter(lambda x: not np.isnan(x), self.lista_soma))   
     def valores(self,coluna):
         l_gasto_total = []
         l_gasto_mensal_hfp = []
