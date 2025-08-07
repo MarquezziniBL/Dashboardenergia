@@ -193,7 +193,7 @@ class Dashboard():
                     with self.col17:
                         st.text("Custo")
                         st.text(f"Total: {tvma} - dividido em HFP = {v_hfp_mes_atual}  e HP =  {v_hp_mes_atual}") 
-                        st.text(f"Média Anual: {media_anual}") 
+                        
                     self.container3_3_2 = st.container(key="container_tres_dois_dois", border=True) 
                     with self.container3_3_2:
                         st.markdown(" <div style='text-align: center'> Comparativos </div>",unsafe_allow_html=True)
