@@ -10,7 +10,7 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Versão: 1.5.19"
+versao = " Desenvolvedor: 3º Sgt Marquezzini - Versão: 1.5.20"
 
 lista_anos = [2024,2025]
 
@@ -224,11 +224,15 @@ class Dashboard():
         for x in list(lista_somas_consumo):
             soma_total += x
         
+        
         return lista_somas_consumo, soma_total
 
     def __init__(self):    
         self.titulo_pagina = st.set_page_config(page_title="Dashboard", layout="wide",
             initial_sidebar_state="collapsed")
+        
+        #Tirar anchor de elementos
+        st.html("<style>[data-testid='stHeaderActionElements'] {display: none;}</style>")
         
         with st.sidebar:
             st.write("Links Importantes")
@@ -242,8 +246,8 @@ class Dashboard():
                 novo_tamanho = (77,100)
                 st.image(imagem.resize(novo_tamanho))
         with col2:    
-            st.header("Dashboard de Controle de Energia", anchor=False)
-            col4, col5, col6 = st.columns([1,2,1],gap="small")
+            st.markdown("<h1 class = h1_header>Dashboard </br> Controle de Energia</h1>", unsafe_allow_html=True)
+            col4, col5, col6 = st.columns([1,4,1],gap="small")
             with col5:
                 st.write(versao)
         
@@ -262,9 +266,10 @@ class Dashboard():
                     st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : {locale.currency(df0["Valor"][0], grouping=True)}")
                 try:
                     dados,soma_geral = self.info_centralizada()
+                    dados_f = [locale.format_string("%.0f",num,grouping=True) for num in dados]
                     fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, 
                         marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
-                        text=dados)])
+                        text=dados_f)])
                     fig.update_layout(
                             title=f"Consumo geral: {locale.format_string("%.0f",soma_geral, grouping=True)} KWh",
                             yaxis_title="Consumo",
@@ -285,14 +290,14 @@ class Dashboard():
                 dict_dependencias[i] = z
             fig1 = go.Figure()
             for i in lista_dependencias:
-                fig1.add_trace(go.Scatter(x=lista_meses,y=dict_dependencias[i], name=i, mode="markers", marker = dict(size=20)))
+                fig1.add_trace(go.Scatter(x=lista_meses,y=dict_dependencias[i], name=i, mode="markers", marker = dict(size=20),
+                                )) 
             fig1.update_layout(
                             title={"text":"Consumo anual das dependências","x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
-                            yaxis=dict(title = "Consumo", tickformat = ',.0f'),
+                            yaxis=dict(title = "Consumo"),
                             xaxis_title="Data",
                             xaxis = dict(title="Meses"),
-    
-                            hovermode = "x"
+                            hovermode = "x unified"
                         )
             st.plotly_chart(fig1, use_container_width=True)
         self.container3 = st.container(key="container_tres") 
