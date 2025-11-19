@@ -10,15 +10,18 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Desenvolvedor: 3º Sgt Marquezzini - Versão: 1.5.20"
+versao = " Desenvolvedor: 3º Sgt Marquezzini - Versão: 1.6.0"
 
-lista_anos = [2024,2025]
+lista_anos = [2024,2025,2026]
+ano_atual= lista_anos.index(date.today().year)
 
 lista_meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO",
     "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01"]
 dict_dias_semana = {"0":"Seg","1":"Ter","2":"Qua","3":"Qui","4":"Sex","5":"Sáb","6":"Dom"}
 colunas = ["Data","SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV 01"]
+
+caminho_planilha = "planilhas/"
 
 class Dashboard():
     def local_css(self,filename):
@@ -40,7 +43,7 @@ class Dashboard():
             return l_dias_semana 
     def atividades_mes_atual (self, posicao):
         try:   
-            self.planilha_atividades = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=self.selecao_opcoes_mes)
+            self.planilha_atividades = pd.read_excel(f"{caminho_planilha}medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=self.selecao_opcoes_mes)
             df_atividade = pd.DataFrame(self.planilha_atividades, columns=["","ATIVIDADES"])
             lista_atividades = str(df_atividade["ATIVIDADES"][posicao]).split(",")
             with self.col17:
@@ -52,11 +55,10 @@ class Dashboard():
                         st.text(f"{x}º - {i}")
                     x += 1
         except FileNotFoundError:
-                self.container3_1.error(f"ARQUIVO NÃO ENCONTRADO", width=500)
-                
+                self.container3_1.error(f"ARQUIVO NÃO ENCONTRADO", width=500)             
     def consumo_total_dependecias(self,coluna):
         lista_soma = []
-        self.planilha_consumo_total = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=lista_meses)
+        self.planilha_consumo_total = pd.read_excel(f"{caminho_planilha}medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=lista_meses)
         for i in lista_meses:
             total = sum(filter(lambda x: not np.isnan(x),self.planilha_consumo_total[i][coluna+"-HFP"])) + sum(filter(lambda x: not np.isnan(x),self.planilha_consumo_total[i][coluna+"-HP"]))
             lista_soma.append(float(f"{total:.0f}"))
@@ -66,10 +68,10 @@ class Dashboard():
         
         if situacao == "analise":
             mes_posicao = lista_meses.index(self.selecao_opcoes_mes)
-            self.planilha_medicao_analise = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=lista_meses[mes_posicao-1])
+            self.planilha_medicao_analise = pd.read_excel(f"{caminho_planilha}medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=lista_meses[mes_posicao-1])
             try:    
                 if self.selecao_opcoes_mes == "JANEIRO":
-                    self.planilha_medicao_analise = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano-1}.xlsx", sheet_name=lista_meses[mes_posicao-1])
+                    self.planilha_medicao_analise = pd.read_excel(f"{caminho_planilha}medicao_energia_{self.selecao_opcoes_ano-1}.xlsx", sheet_name=lista_meses[mes_posicao-1])
             except FileNotFoundError:
                 self.planilha_medicao_analise = self.planilha_medicao
                 self.container3_2.error(f"Não existe arquivo para {self.selecao_opcoes_ano-1}", width=500)
@@ -95,7 +97,7 @@ class Dashboard():
         l_gasto_mensal_hp = []
         l_gasto_soma = []
         l_gasto_anual = []
-        self.planilha_gasto = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name="GASTOMENSAL")
+        self.planilha_gasto = pd.read_excel(f"{caminho_planilha}medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name="GASTOMENSAL")
         df1 = pd.DataFrame(self.planilha_gasto, columns=[coluna+"-HFP", coluna+"-HP"])
         
         dict_meses = {"JANEIRO":[df1[coluna+"-HFP"][0],df1[coluna+"-HP"][0]], "FEVEREIRO":[df1[coluna+"-HFP"][1],df1[coluna+"-HP"][1]],
@@ -120,10 +122,10 @@ class Dashboard():
             l_gasto_anual.append(dict_meses[i][0]+dict_meses[i][1])
         return list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_total)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_mensal_hfp)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_mensal_hp)), list(filter(lambda x: not np.isnan(x) and x > 0,l_gasto_soma)), l_gasto_anual
     def valores_mes_ant (self,coluna):
-        self.planilha_gasto = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name="GASTOMENSAL")
+        self.planilha_gasto = pd.read_excel(f"{caminho_planilha}medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name="GASTOMENSAL")
         df1 = pd.DataFrame(self.planilha_gasto, columns=[coluna+"-HFP", coluna+"-HP"])
         if self.selecao_opcoes_mes == "JANEIRO":
-            self.planilha_gasto = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano-1}.xlsx", sheet_name="GASTOMENSAL")
+            self.planilha_gasto = pd.read_excel(f"{caminho_planilha}medicao_energia_{self.selecao_opcoes_ano-1}.xlsx", sheet_name="GASTOMENSAL")
             df1 = pd.DataFrame(self.planilha_gasto, columns=[coluna+"-HFP", coluna+"-HP"])
             st.write(df1[coluna+"-HFP"][11])
             lista_valor_mes_ant =  [df1[coluna+"-HFP"][11],df1[coluna+"-HP"][11]]
@@ -132,7 +134,7 @@ class Dashboard():
             lista_valor_mes_ant =  [df1[coluna+"-HFP"][pos_mes_ant],df1[coluna+"-HP"][pos_mes_ant]]
         return lista_valor_mes_ant
     def analise_gemma (self):
-        try:
+
             l_hfp_mes_ant,l_hp_mes_ant,l_soma_mes_ant = self.consumo("analise",self.selecao_opcoes_dependencia)
             lista_valores_mes_ant = self.valores_mes_ant(self.selecao_opcoes_dependencia)
             
@@ -202,13 +204,7 @@ class Dashboard():
                         st.text("Custo")
                         st.text(f"  1) Mês atual =  {tvma} -  Mês anterior = {tvma_mes_ante}, Variação de {vari_custo_mensal}")
                     st.button("Fechar", on_click= lambda: self.container3_2.empty())
-        except ZeroDivisionError:
-            self.container3_2.error(f"Dados para o mês zerados", width=500)
-            with self.container3_2:
-                st.button("Fechar", on_click= lambda: self.container3_2.empty())
-        except FileNotFoundError:
-            with self.container3_2:
-                st.button("Fechar", on_click= lambda: self.container3_2.empty())
+                    
     def info_centralizada(self):
         df = pd.DataFrame(self.planilha_medicao)
         lista_somas_consumo = []
@@ -255,147 +251,139 @@ class Dashboard():
         with self.container:
             col7, col8= st.columns([1,3],gap="small", vertical_alignment="center" )
             with col7:
-                self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos)
+                self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos,index=ano_atual)
                 self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses)
                 self.selecao_opcoes_dependencia = st.selectbox("Dependência",options= lista_dependencias)
-            self.planilha_medicao = pd.read_excel(f"medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=self.selecao_opcoes_mes)
-            df0 = pd.DataFrame(self.planilha_medicao).reindex(columns=['Bandeira','Valor'])
-            with col8:
-                col9, col10, col11= st.columns([1,5,1],gap="small", vertical_alignment="center" )
-                with col10:
-                    st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : {locale.currency(df0["Valor"][0], grouping=True)}")
-                try:
-                    dados,soma_geral = self.info_centralizada()
-                    dados_f = [locale.format_string("%.0f",num,grouping=True) for num in dados]
-                    fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, 
-                        marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
-                        text=dados_f)])
-                    fig.update_layout(
-                            title=f"Consumo geral: {locale.format_string("%.0f",soma_geral, grouping=True)} KWh",
-                            yaxis_title="Consumo",
-                            height = 300
-                            )
-                    st.plotly_chart(fig, use_container_width=True)
-                    self.container1 = st.container(key="container_um")
-                    with self.container1:
-                        st.text(f"Sede: {locale.format_string("%.2f%%",(dados[0]/soma_geral)*100)}    HTS: {locale.format_string("%.2f%%",(dados[1]/soma_geral)*100)}    HTO: {locale.format_string("%.2f%%",(dados[2]/soma_geral)*100)}    ALQQ: {locale.format_string("%.2f%%",(dados[3]/soma_geral)*100)}    USINA/CICRIN: {locale.format_string("%.2f%%",(dados[4]/soma_geral)*100)}    FADOR: {locale.format_string("%.2f%%",(dados[5]/soma_geral)*100)}    CIAFV 01: {locale.format_string("%.2f%%",(dados[6]/soma_geral)*100)}")
-                except Exception:
-                    st.error(f"Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
-
-        self.container2 = st.container(key="container_dois")
-        with self.container2:
-            dict_dependencias = {}
-            for i in lista_dependencias:
-                z = self.consumo_total_dependecias(i)
-                dict_dependencias[i] = z
-            fig1 = go.Figure()
-            for i in lista_dependencias:
-                fig1.add_trace(go.Scatter(x=lista_meses,y=dict_dependencias[i], name=i, mode="markers", marker = dict(size=20),
-                                )) 
-            fig1.update_layout(
-                            title={"text":"Consumo anual das dependências","x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
-                            yaxis=dict(title = "Consumo"),
-                            xaxis_title="Data",
-                            xaxis = dict(title="Meses"),
-                            hovermode = "x unified"
-                        )
-            st.plotly_chart(fig1, use_container_width=True)
-        self.container3 = st.container(key="container_tres") 
-        with self.container3:
-            df2 = pd.DataFrame(self.planilha_medicao)
-            lista_x = self.dias_semana(df2["Data"])
-            self.l_custo,self.l_custo_hfp,self.l_custo_hp, self.l_custo_soma, self.l_custo_anual = self.valores(self.selecao_opcoes_dependencia)
-            self.l_hfp,self.l_hp,self.l_consumo_soma = self.consumo("normal",self.selecao_opcoes_dependencia)
+            try:
+                
+                self.planilha_medicao = pd.read_excel(f"{caminho_planilha}medicao_energia_{self.selecao_opcoes_ano}.xlsx", sheet_name=self.selecao_opcoes_mes)
+                df0 = pd.DataFrame(self.planilha_medicao).reindex(columns=['Bandeira','Valor'])
             
-            st.markdown(f"<h3 style='text-align: center'> Dados do(a) {self.selecao_opcoes_dependencia} </h3>",unsafe_allow_html=True)
-            
-            
-            col12,col13 = st.columns([6,1],gap="small", vertical_alignment="center" )
-            with col12:
-                barra_custo_hfp = go.Bar(x=lista_meses, y=self.l_custo_hfp, name="HFP", marker_color = "#00a2ff")
-                barra_custo_hp = go.Bar(x=lista_meses, y=self.l_custo_hp, name = "HP", marker_color = "#ff6600")
-                linha_custo_soma = go.Scatter(x=lista_meses, y=self.l_custo_soma, name="HFP + HP" ,mode="markers+lines", 
-                        marker=dict(size=8, symbol="circle", color = "red"), line=dict(width=3,color="#f15454", shape = "spline"))
-                self.fig_custo = go.Figure(data=[barra_custo_hfp,barra_custo_hp,linha_custo_soma])
-                self.fig_custo.update_layout(
-                                title={"text":f"Custo mensal",
-                                    "x":0.1,"y":0.9,"xanchor" : "left", "yanchor":"top"},
-                                yaxis = dict(title="Custo (R$)", tickformat=',.2f', tickprefix = "R$", separatethousands =True),
-                                xaxis = dict(title="Meses"),
-                                plot_bgcolor = "#b6d5ee",
-                                paper_bgcolor = "#006494",
-                                hovermode = "x",
+                with col8:
+                    col9, col10, col11= st.columns([1,5,1],gap="small", vertical_alignment="center" )
+                    with col10:
+                        st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}:  {df0['Bandeira'][0]}, valor a mais por 100 KWh : {locale.currency(df0["Valor"][0], grouping=True)}")
+                    try:
+                        dados,soma_geral = self.info_centralizada()
+                        dados_f = [locale.format_string("%.0f",num,grouping=True) for num in dados]
+                        fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, 
+                            marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
+                            text=dados_f)])
+                        fig.update_layout(
+                                title=f"Consumo geral: {locale.format_string("%.0f",soma_geral, grouping=True)} KWh",
+                                yaxis_title="Consumo",
+                                height = 300
                                 )
-                st.plotly_chart(self.fig_custo, use_container_width=True)
-            
-            with col13:
-                pizza_custo = go.Pie(labels=["",""],values=[sum(self.l_custo_hfp), sum(self.l_custo_hp)], showlegend=False,
-                            title="Percentual HFP x HP")
-                fig_pizza_custo = go.Figure(data=[pizza_custo])
-                fig_pizza_custo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
-                    line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
-                fig_pizza_custo.update_layout(
-                    paper_bgcolor = "#006494",
-                )
-                st.plotly_chart(fig_pizza_custo, key="pizza_custo")
-            
-            
-            col14,col15 = st.columns([6,1],gap="small", vertical_alignment="center" )
-            with col14:
-                barra_consumo_hfp = go.Bar(x=lista_x, y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
-                barra_consumo_hp = go.Bar(x=lista_x, y=self.l_hp, name = "HP", marker_color = "#ff6600")
-                linha_consumo_soma = go.Scatter(x=lista_x, y=self.l_consumo_soma, name="HFP + HP" ,mode="markers+lines", 
-                    marker=dict(size=6, symbol="circle", color = "red"), line=dict(width=3,color= "red"))
-                self.fig_consumo = go.Figure(data=[barra_consumo_hfp,barra_consumo_hp,linha_consumo_soma])
-                self.fig_consumo.update_layout(
-                            title={"text":f"Consumo diário de {str(self.selecao_opcoes_mes).lower()}",
-                                "x":0.1,"y":0.9,"xanchor" : "left", "yanchor":"top"},
-                            yaxis = dict(title="Consumo", tickformat=',.0f'),
-                            xaxis = dict(title="Data"),
-                            plot_bgcolor = "#b6d5ee",
-                            paper_bgcolor = "#006494",
-                            hovermode = "x",
-                            )
-                st.plotly_chart(self.fig_consumo, use_container_width=True)
+                        st.plotly_chart(fig, use_container_width=True)
+                        self.container1 = st.container(key="container_um")
+                        with self.container1:
+                            st.text(f"Sede: {locale.format_string("%.2f%%",(dados[0]/soma_geral)*100)}    HTS: {locale.format_string("%.2f%%",(dados[1]/soma_geral)*100)}    HTO: {locale.format_string("%.2f%%",(dados[2]/soma_geral)*100)}    ALQQ: {locale.format_string("%.2f%%",(dados[3]/soma_geral)*100)}    USINA/CICRIN: {locale.format_string("%.2f%%",(dados[4]/soma_geral)*100)}    FADOR: {locale.format_string("%.2f%%",(dados[5]/soma_geral)*100)}    CIAFV 01: {locale.format_string("%.2f%%",(dados[6]/soma_geral)*100)}")
+                    except Exception:
+                        st.error(f"Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
 
-            with col15:
-                pizza_consumo = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
-                            title="Percentual HFP x HP")
-                fig_pizza_consumo = go.Figure(data=[pizza_consumo])
-                fig_pizza_consumo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
-                    line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
-                fig_pizza_consumo.update_layout(
-                    paper_bgcolor = "#006494",
-                )
-                st.plotly_chart(fig_pizza_consumo, key="pizza_consumo")
-                
-            self.container3_1 = st.container(key="container_tres_um", border=True)
-            with self.container3_1:
-                self.col16,self.col17 = st.columns([1,6],gap="small", vertical_alignment="top")
-                with self.col16:
-                    self.selecao_dias_semana = st.selectbox("Dia da Semana",options= lista_x,key="dias_semana")
-                    self.atividades_mes_atual(lista_x.index(self.selecao_dias_semana))
-                
-            self.container3_2 = st.container(key="container_tres_dois")
-            with self.container3_2:
-                st.button("Análise", on_click=self.analise_gemma)
-            
-            self.container3_3 = st.container(key="container_tres_tres") 
-        
-            self.container3_4 = st.container(key="container_tres_quatro")
-            with self.container3_4:
-                fig6 = go.Figure()
-                del colunas [0]
-                for i in colunas:
-                    fig6.add_trace(go.Scatter(x=lista_x,y=df2[i], name=i, mode="markers+lines"))
-                fig6.update_layout(
-                            title={"text":"Gráfico de medições","x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
-                            yaxis_title="Medição",
-                            xaxis_title="Data",
-                            xaxis = dict(title="Data",range = [0,31]),
-                            hovermode = "x"
+                self.container2 = st.container(key="container_dois")
+                with self.container2:
+                    dict_dependencias = {}
+                    for i in lista_dependencias:
+                        z = self.consumo_total_dependecias(i)
+                        dict_dependencias[i] = z
+                    fig1 = go.Figure()
+                    for i in lista_dependencias:
+                        fig1.add_trace(go.Scatter(x=lista_meses,y=dict_dependencias[i], name=i, mode="markers", marker = dict(size=20),
+                                        )) 
+                    fig1.update_layout(
+                                    title={"text":"Consumo anual das dependências","x":0.5,"y":0.9,"xanchor" : "center", "yanchor":"top"},
+                                    yaxis=dict(title = "Consumo"),
+                                    xaxis_title="Data",
+                                    xaxis = dict(title="Meses"),
+                                    hovermode = "x unified"
+                                )
+                    st.plotly_chart(fig1, use_container_width=True)
+                self.container3 = st.container(key="container_tres") 
+                with self.container3:
+                    df2 = pd.DataFrame(self.planilha_medicao)
+                    lista_x = self.dias_semana(df2["Data"])
+                    self.l_custo,self.l_custo_hfp,self.l_custo_hp, self.l_custo_soma, self.l_custo_anual = self.valores(self.selecao_opcoes_dependencia)
+                    self.l_hfp,self.l_hp,self.l_consumo_soma = self.consumo("normal",self.selecao_opcoes_dependencia)
+                    
+                    st.markdown(f"<h3 style='text-align: center'> Dados do(a) {self.selecao_opcoes_dependencia} </h3>",unsafe_allow_html=True)
+                    
+                    
+                    col12,col13 = st.columns([6,1],gap="small", vertical_alignment="center" )
+                    with col12:
+                        barra_custo_hfp = go.Bar(x=lista_meses, y=self.l_custo_hfp, name="HFP", marker_color = "#00a2ff")
+                        barra_custo_hp = go.Bar(x=lista_meses, y=self.l_custo_hp, name = "HP", marker_color = "#ff6600")
+                        linha_custo_soma = go.Scatter(x=lista_meses, y=self.l_custo_soma, name="HFP + HP" ,mode="markers+lines", 
+                                marker=dict(size=8, symbol="circle", color = "red"), line=dict(width=3,color="#f15454", shape = "spline"))
+                        self.fig_custo = go.Figure(data=[barra_custo_hfp,barra_custo_hp,linha_custo_soma])
+                        self.fig_custo.update_layout(
+                                        title={"text":f"Custo mensal",
+                                            "x":0.1,"y":0.9,"xanchor" : "left", "yanchor":"top"},
+                                        yaxis = dict(title="Custo (R$)", tickformat=',.2f', tickprefix = "R$", separatethousands =True),
+                                        xaxis = dict(title="Meses"),
+                                        plot_bgcolor = "#b6d5ee",
+                                        paper_bgcolor = "#006494",
+                                        hovermode = "x",
+                                        )
+                        st.plotly_chart(self.fig_custo, use_container_width=True)
+                    
+                    with col13:
+                        pizza_custo = go.Pie(labels=["",""],values=[sum(self.l_custo_hfp), sum(self.l_custo_hp)], showlegend=False,
+                                    title="Percentual HFP x HP")
+                        fig_pizza_custo = go.Figure(data=[pizza_custo])
+                        fig_pizza_custo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
+                            line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
+                        fig_pizza_custo.update_layout(
+                            paper_bgcolor = "#006494",
                         )
-                #st.plotly_chart(fig6, use_container_width=True)
-        self.local_css(pathlib.Path("assets//style.css"))
+                        st.plotly_chart(fig_pizza_custo, key="pizza_custo")
+                    
+                    
+                    col14,col15 = st.columns([6,1],gap="small", vertical_alignment="center" )
+                    with col14:
+                        barra_consumo_hfp = go.Bar(x=lista_x, y=self.l_hfp, name="HFP", marker_color = "#00a2ff")
+                        barra_consumo_hp = go.Bar(x=lista_x, y=self.l_hp, name = "HP", marker_color = "#ff6600")
+                        linha_consumo_soma = go.Scatter(x=lista_x, y=self.l_consumo_soma, name="HFP + HP" ,mode="markers+lines", 
+                            marker=dict(size=6, symbol="circle", color = "red"), line=dict(width=3,color= "red"))
+                        self.fig_consumo = go.Figure(data=[barra_consumo_hfp,barra_consumo_hp,linha_consumo_soma])
+                        self.fig_consumo.update_layout(
+                                    title={"text":f"Consumo diário de {str(self.selecao_opcoes_mes).lower()}",
+                                        "x":0.1,"y":0.9,"xanchor" : "left", "yanchor":"top"},
+                                    yaxis = dict(title="Consumo", tickformat=',.0f'),
+                                    xaxis = dict(title="Data"),
+                                    plot_bgcolor = "#b6d5ee",
+                                    paper_bgcolor = "#006494",
+                                    hovermode = "x",
+                                    )
+                        st.plotly_chart(self.fig_consumo, use_container_width=True)
+
+                    with col15:
+                        pizza_consumo = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
+                                    title="Percentual HFP x HP")
+                        fig_pizza_consumo = go.Figure(data=[pizza_consumo])
+                        fig_pizza_consumo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
+                            line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
+                        fig_pizza_consumo.update_layout(
+                            paper_bgcolor = "#006494",
+                        )
+                        st.plotly_chart(fig_pizza_consumo, key="pizza_consumo")
+                        
+                    self.container3_1 = st.container(key="container_tres_um", border=True)
+                    with self.container3_1:
+                        self.col16,self.col17 = st.columns([1,6],gap="small", vertical_alignment="top")
+                        with self.col16:
+                            self.selecao_dias_semana = st.selectbox("Dia da Semana",options= lista_x,key="dias_semana")
+                            self.atividades_mes_atual(lista_x.index(self.selecao_dias_semana))
+                        
+                    self.container3_2 = st.container(key="container_tres_dois")
+                    with self.container3_2:
+                        st.button("Análise", on_click=self.analise_gemma)
+                    
+                    self.container3_3 = st.container(key="container_tres_tres") 
+        
+            except FileNotFoundError:
+                st.error(f"Arquivo {caminho_planilha}medicao_energia_{self.selecao_opcoes_ano}.xlsx não encontrado")
+            
+            self.local_css(pathlib.Path("assets//style.css"))
 if __name__=="__main__":
     Dashboard()
