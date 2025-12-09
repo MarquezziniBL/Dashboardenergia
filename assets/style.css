@@ -1,0 +1,46 @@
+.h1_header{
+    color: #ffffff;
+    text-align: center;
+    text-shadow: 2px 3px 2px #131312;
+}
+
+.st-key-container_um{
+    vertical-align: top;
+    text-align: center;
+}
+
+.st-key-container_dois{
+    background-color: rgb(0, 100, 148);
+    border: outset ;
+    border-width: 5px;
+    border-color: rgb(191, 215, 243);
+    border-radius: 5px;
+    box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.5);
+    padding: 2%;
+}
+
+.st-key-container_tres{
+    background-color: rgb(0, 100, 148);
+    border: outset ;
+    border-width: 5px;
+    border-color: rgb(191, 215, 243);
+    border-radius: 5px;
+    box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.5);
+    padding: 2%;
+}
+
+.st-key-container_tres_um{
+    text-align: center;
+    vertical-align: top;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.st-key-container_tres_tres{
+    text-align: center;
+    vertical-align: top;
+    background-color: rgb(0, 100, 148);
+    border-radius: 5px;
+    padding: 5px;
+}
+
