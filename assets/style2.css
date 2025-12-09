@@ -9,14 +9,6 @@
     box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.5);
     padding: 2%;
 }
-.st-key-container_1_1{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-
-}
 
 .st-key-container_1_1_select_ano{
     width: 120%;

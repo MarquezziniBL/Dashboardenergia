@@ -179,6 +179,8 @@ class Dashboard():
         st.html("<style>[data-testid='stHeaderActionElements'] {display: none;}</style>")
         
         with st.sidebar:
+            st.page_link('Home.py', label= "Home")
+            st.page_link('pages/lançamentos.py', label= "Lançamentos")
             st.write("Links Importantes")
             st.page_link("https://www.cemig.com.br", label="CEMIG")
             st.page_link("https://atende.cemig.com.br/Login", label="CEMIG Login")
