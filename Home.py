@@ -186,7 +186,7 @@ class Dashboard():
         col1, col2, col3 = st.columns([1,2,1],gap="small")
         with col1:
             with st.columns(3)[1]:
-                imagem = PIL.Image.open(r"Img/brasao2bfv.PNG")
+                imagem = PIL.Image.open(r"img/brasao2bfv.PNG")
                 novo_tamanho = (77,100)
                 st.image(imagem.resize(novo_tamanho))
         with col2:    
