@@ -44,6 +44,6 @@ class Banco_dados():
         return True
     
     def __init__(self,bd):
-        self.cnx = st.connection(f"{bd}", type="sql", url = f"sqlite:///Database/bd_sec/{bd}.db")
+        self.cnx = st.connection(f"{bd}", type="sql", url = f"sqlite:///database/bd_sec/{bd}.db")
 
 
