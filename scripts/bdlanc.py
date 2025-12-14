@@ -22,21 +22,25 @@ class Banco_dados():
     
     def update_consumo(self,tabela,coluna_bd, coluna, **kwargs):
         with self.cnx.session as cnx:
-            cnx.execute(
-                    text(f"update {tabela} set 'SEDE-HFP'={kwargs["sedehfp"]},'SEDE-HP'={kwargs["sedehp"]}, 'HTS-HFP'={kwargs["htshfp"]}, 'HTS-HP'={kwargs["htshp"]}, 'HTO-HFP'={kwargs["htohfp"]}, 'HTO-HP'={kwargs["htohp"]}, 'ALQQ-HFP'={kwargs["alqqhfp"]},'ALQQ-HP'={kwargs["alqqhp"]},'USINA/CICRIN-HFP'={kwargs["usinahfp"]},'USINA/CICRIN-HP'={kwargs["usinahp"]},'FADOR-HFP'={kwargs["fadorhfp"]},'FADOR-HP'={kwargs["fadorhp"]},'CIAFV01-HFP'={kwargs["ciafv01hfp"]}, 'CIAFV01-HP'={kwargs["ciafv01hp"]}, 'ATIVIDADES' = '{kwargs["atividades"]}' where {coluna_bd} = '{coluna}';"))
+            update_text = text(f" update {tabela} set 'SEDE-HFP'= :sedehfp ,'SEDE-HP'= :sedehp, 'HTS-HFP'= :htshfp, 'HTS-HP'= :htshp, 'HTO-HFP'= :htohfp, 'HTO-HP'= :htohp, 'ALQQ-HFP'= :alqqhfp,'ALQQ-HP'= :alqqhp,'USINA/CICRIN-HFP'= :usinahfp,'USINA/CICRIN-HP'= :usinahp,'FADOR-HFP'= :fadorhfp,'FADOR-HP'= :fadorhp,'CIAFV01-HFP'=:ciafv01hfp, 'CIAFV01-HP'= :ciafv01hp, 'ATIVIDADES' = :atividades where {coluna_bd} = :coluna;")
+            values = {"sedehfp":kwargs["sedehfp"],"sedehp":kwargs["sedehp"], "htshfp":kwargs["htshfp"], "htshp":kwargs["htshp"], "htohfp":kwargs["htohfp"], "htohp":kwargs["htohp"], "alqqhfp":kwargs["alqqhfp"], "alqqhp":kwargs["alqqhp"], "usinahfp":kwargs["usinahfp"], "usinahp":kwargs["usinahp"], "fadorhfp":kwargs["fadorhfp"], "fadorhp":kwargs["fadorhp"], "ciafv01hfp":kwargs["ciafv01hfp"], "ciafv01hp":kwargs["ciafv01hp"], "atividades":kwargs["atividades"], "coluna":coluna}
+            cnx.execute(update_text, values)
             cnx.commit()
         return True
     
     def update_valor(self,tabela,coluna_bd, coluna, **kwargs):
         with self.cnx.session as cnx:
-            cnx.execute(
-                    text(f"update {tabela} set 'SEDE-HFP'={kwargs["sedehfp"]},'SEDE-HP'={kwargs["sedehp"]}, 'HTS-HFP'={kwargs["htshfp"]}, 'HTS-HP'={kwargs["htshp"]}, 'HTO-HFP'={kwargs["htohfp"]}, 'HTO-HP'={kwargs["htohp"]}, 'ALQQ-HFP'={kwargs["alqqhfp"]},'ALQQ-HP'={kwargs["alqqhp"]},'USINA/CICRIN-HFP'={kwargs["usinahfp"]},'USINA/CICRIN-HP'={kwargs["usinahp"]},'FADOR-HFP'={kwargs["fadorhfp"]},'FADOR-HP'={kwargs["fadorhp"]},'CIAFV01-HFP'={kwargs["ciafv01hfp"]}, 'CIAFV01-HP'={kwargs["ciafv01hp"]} where {coluna_bd} = '{coluna}';"))
+            update_text = text(f" update {tabela} set 'SEDE-HFP'= :sedehfp ,'SEDE-HP'= :sedehp, 'HTS-HFP'= :htshfp, 'HTS-HP'= :htshp, 'HTO-HFP'= :htohfp, 'HTO-HP'= :htohp, 'ALQQ-HFP'= :alqqhfp,'ALQQ-HP'= :alqqhp,'USINA/CICRIN-HFP'= :usinahfp,'USINA/CICRIN-HP'= :usinahp,'FADOR-HFP'= :fadorhfp,'FADOR-HP'= :fadorhp,'CIAFV01-HFP'=:ciafv01hfp, 'CIAFV01-HP'= :ciafv01hp where {coluna_bd} = :coluna;")
+            values = {"sedehfp":kwargs["sedehfp"],"sedehp":kwargs["sedehp"], "htshfp":kwargs["htshfp"], "htshp":kwargs["htshp"], "htohfp":kwargs["htohfp"], "htohp":kwargs["htohp"], "alqqhfp":kwargs["alqqhfp"], "alqqhp":kwargs["alqqhp"], "usinahfp":kwargs["usinahfp"], "usinahp":kwargs["usinahp"], "fadorhfp":kwargs["fadorhfp"], "fadorhp":kwargs["fadorhp"], "ciafv01hfp":kwargs["ciafv01hfp"], "ciafv01hp":kwargs["ciafv01hp"], "coluna":coluna}
+            cnx.execute(update_text, values)    
             cnx.commit()
         return True
     
     def update_bandeira(self,tabela, **kwargs):
         with self.cnx.session as cnx:
-            cnx.execute(text(f"update '{tabela}' set BANDEIRA = '{kwargs["bandeira"]}', VALOR = '{kwargs["valor"]}' where MES = '{kwargs["mes"]}'"))
+            update_text = text(f"update '{tabela}' set BANDEIRA = :bandeira, VALOR = :valor where MES = :mes")
+            values = {"bandeira":kwargs["bandeira"], "valor": kwargs["valor"], "mes":kwargs["mes"]}
+            cnx.execute(update_text,values)
             cnx.commit()
         return True
     
