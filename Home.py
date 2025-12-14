@@ -13,10 +13,9 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.1.1"
+versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1"
 
-atualizacoes = """ V2.1.1
-- Corrigido problema na atualização de informações; 
+atualizacoes = """ V2.0.1
 - Reestruturação de dados no Layout do aplicativo."""
 
 #Globais
@@ -185,7 +184,7 @@ class Dashboard():
         
         with st.sidebar:
             st.page_link('Home.py', label= "Home")
-            st.page_link('pages/lançamentos.py', label= "Lançamentos")
+            st.page_link('pages/lançamentos.py', label= "Lançamentos", disabled= True)
             st.write("Links Importantes")
             st.page_link("https://www.cemig.com.br", label="CEMIG")
             st.page_link("https://atende.cemig.com.br/Login", label="CEMIG Login")
