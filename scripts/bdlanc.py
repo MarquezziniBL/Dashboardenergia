@@ -40,7 +40,7 @@ class Banco_dados():
         with self.cnx.session as cnx:
             update_text = text(f"update '{tabela}' set BANDEIRA = :bandeira, VALOR = :valor where MES = :mes")
             values = {"bandeira":kwargs["bandeira"], "valor": kwargs["valor"], "mes":kwargs["mes"]}
-            cnx.execute(update_text,values)
+            cnx.execute(update_text,params=values)
             cnx.commit()
         return True
     
