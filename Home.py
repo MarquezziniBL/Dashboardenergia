@@ -24,6 +24,7 @@ lista_anos = [2024,2025,2026]
 ano_atual= lista_anos.index(date.today().year)
 
 
+
 lista_meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO",
     "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
