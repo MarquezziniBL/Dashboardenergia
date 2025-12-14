@@ -52,8 +52,8 @@ class Lanc():
 
             st.markdown("<h5 class =h5_header_lanc> Registros </h5>", unsafe_allow_html=True)
             with st.container(border=False, key="container_1_2"):
-                    self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos,index=ano_atual, key="container_1_1_select_ano")
-                    self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses, key="container_1_1_select_mes")
+                    self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos,index=ano_atual, key="container_1_2_select_ano")
+                    self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses, key="container_1_2_select_mes")
                     df0 = pd.DataFrame(self.update_df0()) 
                     df1 = pd.DataFrame(self.update_df1()) 
                     df2 = pd.DataFrame(self.update_df2())
@@ -90,27 +90,27 @@ class Lanc():
                 with st.container(border=False, key="container_2_1"):
                     sede_hfp = st.number_input("Sede HFP:",min_value= 0.0 ,value = df4["SEDE-HFP"][0], format="%.2f")
                     sede_hp = st.number_input("Sede HP:",min_value= 0.0 ,value = df4["SEDE-HP"][0], format="%.2f")
-                
-                with st.container(border=False, key="container_2_2"):
                     hts_hfp = st.number_input("HTS HFP:",min_value= 0.0 ,value = df4["HTS-HFP"][0], format="%.2f")
                     hts_hp = st.number_input("HTS HP:",min_value= 0.0 ,value = df4["HTS-HP"][0], format="%.2f")
+                    
+                with st.container(border=False, key="container_2_2"):
                     hto_hfp = st.number_input("HTO HFP:",min_value= 0.0 ,value = df4["HTO-HFP"][0], format="%.2f")
                     hto_hp = st.number_input("HTO HP:",min_value= 0.0 ,value = df4["HTO-HP"][0], format="%.2f")
-                    
-                with st.container(border=False, key="container_2_3"):
                     alqq_hfp = st.number_input("ALQQ HFP:",min_value= 0.0 ,value = df4["ALQQ-HFP"][0], format="%.2f")
                     alqq_hp = st.number_input("ALQQ HP:",min_value= 0.0 ,value = df4["ALQQ-HP"][0], format="%.2f")
+                    
+                with st.container(border=False, key="container_2_3"):
                     usina_hfp = st.number_input("USINA/CICRIN HFP:",min_value= 0.0 ,value = df4["USINA/CICRIN-HFP"][0], format="%.2f")
                     usina_hp = st.number_input("USINA/CICRIN HP:",min_value= 0.0 ,value = df4["USINA/CICRIN-HP"][0], format="%.2f")
-                
-                with st.container(border=False, key="container_2_4"):
                     fador_hfp = st.number_input("FADOR HFP:",min_value= 0.0 ,value = df4["FADOR-HFP"][0], format="%.2f")
                     fador_hp = st.number_input("FADOR HP:",min_value= 0.0 ,value = df4["FADOR-HP"][0], format="%.2f")
+                    
+                with st.container(border=False, key="container_2_4"):
                     ciafv01_hfp = st.number_input("CIAFV01 HFP:",min_value= 0.0 ,value = df4["CIAFV01-HFP"][0], format="%.2f")
                     ciafv01_hp = st.number_input("CIA01 HP:",min_value= 0.0 ,value = df4["CIAFV01-HP"][0], format="%.2f")
                 
                 with st.container(border=False, key="container_2_5"):
-                    self.atividades = st.text_input("Atividades", value = df4["ATIVIDADES"][0],placeholder= "Reunião Adm, Reunião de Obras, etc...")
+                    self.atividades = st.text_input("Atividades", value = df4["ATIVIDADES"][0],placeholder= "Reunião Adm, Reunião de Obras, etc...", key= "input_2_5")
                 
                 if st.button("Atualizar"):
                     try:
@@ -130,28 +130,30 @@ class Lanc():
             
             with tab5:
                 with st.container(border=False, key="container_2_6"):
-                    self.selecao_mes = st.selectbox("Mês", options= lista_meses )
+                    self.selecao_mes = st.selectbox("Mês", options= lista_meses, key="input_2_6" )
+                    
+                with st.container(border=False, key="container_2_7"):
                     v_sede_hfp = st.number_input("  Sede HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                     v_sede_hp = st.number_input("  Sede HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
-                
-                with st.container(border=False, key="container_2_7"):
                     v_hts_hfp = st.number_input("  HTS HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                     v_hts_hp = st.number_input("  HTS HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
-                    v_hto_hfp = st.number_input("  HTO HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
-                    v_hto_hp = st.number_input("  HTO HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                     
                 with st.container(border=False, key="container_2_8"):
+                    v_hto_hfp = st.number_input("  HTO HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
+                    v_hto_hp = st.number_input("  HTO HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                     v_alqq_hfp = st.number_input("  ALQQ HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                     v_alqq_hp = st.number_input("  ALQQ HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
-                    v_usina_hfp = st.number_input("  USINA/CICRIN HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
-                    v_usina_hp = st.number_input("  USINA/CICRIN HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                 
                 with st.container(border=False, key="container_2_9"):
+                    v_usina_hfp = st.number_input("  USINA/CICRIN HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
+                    v_usina_hp = st.number_input("  USINA/CICRIN HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                     v_fador_hfp = st.number_input("  FADOR HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                     v_fador_hp = st.number_input("  FADOR HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
+                
+                with st.container(border=False, key="container_2_10"):
                     v_ciafv01_hfp = st.number_input("  CIAFV01 HFP:",min_value= 0.0 ,value = 0.0, format="%.2f")
                     v_ciafv01_hp = st.number_input(" CIA01 HP:",min_value= 0.0 ,value = 0.0, format="%.2f")
-                
+    
                 if st.button("Atualizar "):
                     try:
                         
@@ -169,7 +171,7 @@ class Lanc():
                     except BaseException:
                         st.toast("Erro ao conectar com Banco de Dados!")
             with tab6:
-                with st.container(border=False, key="container_2_10"):  
+                with st.container(border=False, key="container_2_11"):  
                     self.selecao_ano1 = st.selectbox(" Ano ", options= lista_anos, index= ano_atual) 
                     self.selecao_mes1 = st.selectbox(" Mês ", options= lista_meses)
                     self.selecao_bandeira = st.selectbox(" Bandeira ", options= lista_bandeira)

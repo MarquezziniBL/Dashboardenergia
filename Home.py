@@ -13,7 +13,11 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Desenvolvedor: 2º Sgt Marquezzini - Versão: 2.0.0"
+versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.1.1"
+
+atualizacoes = """ V2.1.1
+- Corrigido problema na atualização de informações; 
+- Reestruturação de dados no Layout do aplicativo."""
 
 #Globais
 lista_anos = [2024,2025,2026]
@@ -185,59 +189,57 @@ class Dashboard():
             st.page_link("https://www.cemig.com.br", label="CEMIG")
             st.page_link("https://atende.cemig.com.br/Login", label="CEMIG Login")
         
-        col1, col2, col3 = st.columns([1,2,1],gap="small")
-        with col1:
-            with st.columns(3)[1]:
-                imagem = PIL.Image.open(r"img/brasao2bfv.PNG")
-                novo_tamanho = (77,100)
-                st.image(imagem.resize(novo_tamanho))
-        with col2:    
-            st.markdown("<h1 class = h1_header>Dashboard </br> Controle de Energia</h1>", unsafe_allow_html=True)
-            col4, col5, col6 = st.columns([1,4,1],gap="small")
-            with col5:
-                st.write(versao)
+        with st.container(border=False, key= "container_0"):
+            with st.container(border=False, key= "container0_1"):
+                st.image("img//brasao2bfv.PNG")#imagem.resize(novo_tamanho))
+            with st.container(border=False, key= "container0_2"):    
+                st.markdown("<h1 class = h1_header>Dashboard </br> Controle de Energia</h1>", unsafe_allow_html=True)
         
-        self.container = st.container(border=True, key="container")
+        with st.container(border=False, key= "container_1"):
+            st.text(versao,help=atualizacoes)
+            
+        
+        self.container = st.container(border=True, key="container_2")
         with self.container:
-            col7, col8= st.columns([1,3],gap="small", vertical_alignment="center" )
-            with col7:
-                self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos,index=ano_atual)
-                self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses)
-                self.selecao_opcoes_dependencia = st.selectbox("Dependência",options= lista_dependencias)
             try:
-                try:
-                    l_hfp_mes_ant,l_hp_mes_ant,l_soma_mes_ant = self.consumo_mes_ant(self.selecao_opcoes_dependencia)
-                    lista_valores_mes_ant = self.valores_mes_ant(self.selecao_opcoes_dependencia)
-                except Exception:
-                    st.error(f"Não existem dados para {self.selecao_opcoes_ano-1}.")
-                    l_hfp_mes_ant = [0]
-                    l_hp_mes_ant = [0]
-                    l_soma_mes_ant = [0]
-                    lista_valores_mes_ant = [0,0]
-                
-                df0 = pd.DataFrame(bdl.Banco_dados("bandeiras_mes").select_bandeira(self.selecao_opcoes_ano,self.selecao_opcoes_mes))
-                
-                with col8:
-                    col9, col10, col11= st.columns([1,5,1],gap="small", vertical_alignment="center" )
-                    with col10:
-                        st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}: {df0["BANDEIRA"][0]} , valor a mais por 100 KWh:{locale.currency(df0["VALOR"][0], grouping=True)}")
-                    try:
-                        dados,soma_geral = self.info_centralizada()
-                        dados_f = [locale.format_string("%.0f",num,grouping=True) for num in dados]
-                        fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, hoverinfo= "text",
-                            marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
-                            text=dados_f)])
-                        fig.update_layout(
-                                title=f"Consumo geral: {locale.format_string("%.0f",soma_geral, grouping=True)} KWh",
-                                yaxis_title="Consumo",
-                                height = 300
-                                )
-                        st.plotly_chart(fig, use_container_width=True)
-                        self.container1 = st.container(key="container_um")
-                        with self.container1:
+                with st.container(border=False, key="container_2_1"):
+                    col7, col8= st.columns([1,3],gap="small", vertical_alignment="center" )
+                    with col7:
+                        self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos,index=ano_atual)
+                        self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses)
+                        self.selecao_opcoes_dependencia = st.selectbox("Dependência",options= lista_dependencias)
+                    
+                        try:
+                            l_hfp_mes_ant,l_hp_mes_ant,l_soma_mes_ant = self.consumo_mes_ant(self.selecao_opcoes_dependencia)
+                            lista_valores_mes_ant = self.valores_mes_ant(self.selecao_opcoes_dependencia)
+                        except Exception:
+                            st.error(f"Não existem dados para {self.selecao_opcoes_ano-1}.")
+                            l_hfp_mes_ant = [0]
+                            l_hp_mes_ant = [0]
+                            l_soma_mes_ant = [0]
+                            lista_valores_mes_ant = [0,0]
+                        
+                        df0 = pd.DataFrame(bdl.Banco_dados("bandeiras_mes").select_bandeira(self.selecao_opcoes_ano,self.selecao_opcoes_mes))
+                    
+                    with col8:
+                        with st.container(border=False,key="container_2_1_1"):
+                            st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}: {df0["BANDEIRA"][0]} , valor a mais por 100 KWh:{locale.currency(df0["VALOR"][0], grouping=True)}")
+                        try:
+                            dados,soma_geral = self.info_centralizada()
+                            dados_f = [locale.format_string("%.0f",num,grouping=True) for num in dados]
+                            fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, hoverinfo= "text",
+                                marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
+                                text=dados_f)])
+                            fig.update_layout(
+                                    title=f"Consumo geral: {locale.format_string("%.0f",soma_geral, grouping=True)} KWh",
+                                    yaxis_title="Consumo",
+                                    height = 300
+                                    )
+                            st.plotly_chart(fig, use_container_width=True)
+                            
                             st.text(f"Sede: {locale.format_string("%.2f%%",(dados[0]/soma_geral)*100)}    HTS: {locale.format_string("%.2f%%",(dados[1]/soma_geral)*100)}    HTO: {locale.format_string("%.2f%%",(dados[2]/soma_geral)*100)}    ALQQ: {locale.format_string("%.2f%%",(dados[3]/soma_geral)*100)}    USINA/CICRIN: {locale.format_string("%.2f%%",(dados[4]/soma_geral)*100)}    FADOR: {locale.format_string("%.2f%%",(dados[5]/soma_geral)*100)}    CIAFV 01: {locale.format_string("%.2f%%",(dados[6]/soma_geral)*100)}")
-                    except Exception:
-                        st.error(f"Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
+                        except Exception:
+                            st.error(f"Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
 
                 self.container2 = st.container(key="container_dois")
                 with self.container2:
@@ -257,7 +259,8 @@ class Dashboard():
                                     hovermode = "x unified"
                                 )
                     st.plotly_chart(fig1, use_container_width=True)
-                self.container3 = st.container(key="container_tres") 
+                
+                self.container3 = st.container(key="container_3") 
                 with self.container3:
                     df2 = pd.DataFrame(bdl.Banco_dados(self.selecao_opcoes_ano).select(self.selecao_opcoes_mes))
                     lista_x = self.dias_semana(df2["Data"])
@@ -301,7 +304,6 @@ class Dashboard():
                         st.plotly_chart(fig_pizza_custo, key="pizza_custo")
                     
                     col14,col15 = st.columns([6,1],gap="small", vertical_alignment="center" )
-
                     with col14:
                         barra_consumo_hfp = go.Bar(x=lista_x, y=self.l_hfp, name="HFP", marker_color = "#00a2ff", hoverinfo= "text", 
                             hovertext=[locale.format_string("%.0f",n, grouping=True) for n in self.l_hfp])
