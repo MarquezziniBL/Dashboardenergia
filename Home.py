@@ -222,7 +222,7 @@ class Dashboard():
                         df0 = pd.DataFrame(bdl.Banco_dados("bandeiras_mes").select_bandeira(self.selecao_opcoes_ano,self.selecao_opcoes_mes))
                     
                     with col8:
-                        with st.container(border=False,key="container_2_1_1"):
+                        with st.container(border=False,key="container_2_1_1"):             
                             st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes}: {df0["BANDEIRA"][0]} , valor a mais por 100 KWh:{locale.currency(df0["VALOR"][0], grouping=True)}")
                         try:
                             dados,soma_geral = self.info_centralizada()
