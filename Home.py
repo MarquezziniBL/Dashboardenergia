@@ -15,8 +15,8 @@ locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
 versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1"
 
-atualizacoes = """ V2.0.1
-- Reestruturação de dados no Layout do aplicativo."""
+atualizacoes = """ V2.0.1.1
+- Lançamento dos dados de Dez/25 e JAN/26"""
 
 #Globais
 lista_anos = [2024,2025,2026]
