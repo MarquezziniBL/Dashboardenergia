@@ -13,10 +13,10 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1"
+versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1.2"
 
-atualizacoes = """ V2.0.1.1
-- Lançamento dos dados de Dez/25 e JAN/26"""
+atualizacoes = """ V2.0.1.2
+- Lançamento dos dados de JAN/25 e FEV/26"""
 
 #Globais
 lista_anos = [2024,2025,2026]
