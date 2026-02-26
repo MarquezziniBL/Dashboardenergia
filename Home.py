@@ -13,10 +13,10 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1.2"
+versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1.3"
 
-atualizacoes = """ V2.0.1.2
-- Lançamento dos dados de JAN/25 e FEV/26"""
+atualizacoes = """ V2.0.1.3 - 26/02/2026
+- Lançamento dos dados de FEV/26"""
 
 #Globais
 lista_anos = [2024,2025,2026]
@@ -235,7 +235,7 @@ class Dashboard():
                                     yaxis_title="Consumo",
                                     height = 300
                                     )
-                            st.plotly_chart(fig, use_container_width=True)
+                            st.plotly_chart(fig, width="stretch")
                             
                             st.text(f"Sede: {locale.format_string("%.2f%%",(dados[0]/soma_geral)*100)}    HTS: {locale.format_string("%.2f%%",(dados[1]/soma_geral)*100)}    HTO: {locale.format_string("%.2f%%",(dados[2]/soma_geral)*100)}    ALQQ: {locale.format_string("%.2f%%",(dados[3]/soma_geral)*100)}    USINA/CICRIN: {locale.format_string("%.2f%%",(dados[4]/soma_geral)*100)}    FADOR: {locale.format_string("%.2f%%",(dados[5]/soma_geral)*100)}    CIAFV 01: {locale.format_string("%.2f%%",(dados[6]/soma_geral)*100)}")
                         except Exception:
@@ -258,7 +258,7 @@ class Dashboard():
                                     xaxis = dict(title="Meses"),
                                     hovermode = "x unified"
                                 )
-                    st.plotly_chart(fig1, use_container_width=True)
+                    st.plotly_chart(fig1, width="stretch")
                 
                 self.container3 = st.container(key="container_3") 
                 with self.container3:
@@ -288,7 +288,7 @@ class Dashboard():
                                         paper_bgcolor = "#006494",
                                         hovermode = "x unified",
                                         )
-                        st.plotly_chart(self.fig_custo, use_container_width=True)
+                        st.plotly_chart(self.fig_custo, width="stretch")
                     
                     with col13:
                         pizza_custo = go.Pie(labels=["",""],values=[sum(self.l_custo_hfp), sum(self.l_custo_hp)], showlegend=False,
@@ -322,12 +322,12 @@ class Dashboard():
                                     paper_bgcolor = "#006494",
                                     hovermode = "x unified",
                                     )
-                        st.plotly_chart(self.fig_consumo, use_container_width=True)
+                        st.plotly_chart(self.fig_consumo, width="stretch")
 
                     with col15:
                         pizza_consumo = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
                                     title="Percentual HFP x HP", hoverinfo= "text",
-                                    hovertext=[(locale.currency(sum(self.l_hfp), grouping=True)) , (locale.currency(sum(self.l_hp), grouping=True))])
+                                    hovertext=[(locale.format_string("%.0f",sum(self.l_hfp), grouping=True)) , (locale.format_string("%.0f",sum(self.l_hp), grouping=True))])
                         fig_pizza_consumo = go.Figure(data=[pizza_consumo])
                         fig_pizza_consumo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
                             line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
