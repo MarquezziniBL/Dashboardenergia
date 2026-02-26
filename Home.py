@@ -327,7 +327,7 @@ class Dashboard():
                     with col15:
                         pizza_consumo = go.Pie(labels=["",""],values=[sum(self.l_hfp), sum(self.l_hp)], showlegend=False,
                                     title="Percentual HFP x HP", hoverinfo= "text",
-                                    hovertext=[(locale.currency(sum(self.l_hfp), grouping=True)) , (locale.currency(sum(self.l_hp), grouping=True))])
+                                    hovertext=[(locale.format_string("%.0f",sum(self.l_hfp), grouping=True)) , (locale.format_string("%.0f",sum(self.l_hp), grouping=True))])
                         fig_pizza_consumo = go.Figure(data=[pizza_consumo])
                         fig_pizza_consumo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
                             line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
