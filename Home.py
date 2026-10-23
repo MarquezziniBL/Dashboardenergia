@@ -15,7 +15,7 @@ locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
 versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1.4"
 
-atualizacoes = """ V2.0.1.4 - 26/02/2026
+atualizacoes = """ V2.0.1.4 - 23/10/2026
 - Lançamento dos dados de SET/26"""
 
 #Globais
