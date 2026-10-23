@@ -13,10 +13,10 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1.3"
+versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1.4"
 
-atualizacoes = """ V2.0.1.3 - 26/02/2026
-- Lançamento dos dados de FEV/26"""
+atualizacoes = """ V2.0.1.4 - 23/10/2026
+- Lançamento dos dados de SET/26"""
 
 #Globais
 lista_anos = [2024,2025,2026]
@@ -190,10 +190,7 @@ class Dashboard():
             st.page_link("https://atende.cemig.com.br/Login", label="CEMIG Login")
         
         with st.container(border=False, key= "container_0"):
-            with st.container(border=False, key= "container0_1"):
-                st.image("img//brasao2bfv.PNG")#imagem.resize(novo_tamanho))
-            with st.container(border=False, key= "container0_2"):    
-                st.markdown("<h1 class = h1_header>Dashboard </br> Controle de Energia</h1>", unsafe_allow_html=True)
+                st.markdown("<h1 class = h1_header>Dashboard Controle de Energia</h1>", unsafe_allow_html=True)
         
         with st.container(border=False, key= "container_1"):
             st.text(versao,help=atualizacoes)
