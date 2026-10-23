@@ -190,10 +190,7 @@ class Dashboard():
             st.page_link("https://atende.cemig.com.br/Login", label="CEMIG Login")
         
         with st.container(border=False, key= "container_0"):
-            with st.container(border=False, key= "container0_1"):
-                st.image("img//brasao2bfv.PNG")#imagem.resize(novo_tamanho))
-            with st.container(border=False, key= "container0_2"):    
-                st.markdown("<h1 class = h1_header>Dashboard </br> Controle de Energia</h1>", unsafe_allow_html=True)
+                st.markdown("<h1 class = h1_header>Dashboard Controle de Energia</h1>", unsafe_allow_html=True)
         
         with st.container(border=False, key= "container_1"):
             st.text(versao,help=atualizacoes)
