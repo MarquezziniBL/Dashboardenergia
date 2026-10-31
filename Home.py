@@ -168,7 +168,6 @@ class Dashboard():
         df1 = pd.DataFrame(bdl.Banco_dados(self.selecao_opcoes_ano).select("GASTOMENSAL"))
         if self.selecao_opcoes_mes == "JANEIRO":
             df1 = pd.DataFrame(bdl.Banco_dados(self.selecao_opcoes_ano-1).select("GASTOMENSAL"))
-            st.write(df1[coluna+"-HFP"][11])
             lista_valor_mes_ant =  [df1[coluna+"-HFP"][11],df1[coluna+"-HP"][11]]
         else:
             pos_mes_ant = lista_meses.index(self.selecao_opcoes_mes)-1
