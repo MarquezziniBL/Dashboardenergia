@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from datetime import date
+from datetime import date, datetime
 import calendar
 from scripts import consulta_bd as consbd
 
@@ -46,7 +46,39 @@ class Calc ():
             dict_dados[f"{i}"] = dados
         
         return dict_dados
+    
     #FUNÇÕES DE TRATAMENTO DE DADOS
+
+    def atividades_mes_atual(self,posicao,l_atividades):
+        texto = ""
+        atividades = str(l_atividades[posicao]).split(",")
+        x = 1
+        for i in atividades:
+            if i == "None":
+                i = "SEM ATIVIDADES"
+            else:
+                i = f"{x} - {i}  "
+            
+            texto += i
+            x += 1
+        
+        return texto
+
+    def mudar_formato_data(self, l_data_data):
+        nova_l_data = []
+        dict_dias_semana = {"0":"Seg","1":"Ter","2":"Qua","3":"Qui","4":"Sex","5":"Sáb","6":"Dom"}
+
+        for i in l_data_data:
+                data_editar = str(i).replace("/","-")  
+                l_data= data_editar.split(sep ="-",maxsplit=3)
+                dia,mes,ano = l_data[0],l_data[len(l_data)//2],l_data[-1]
+                data = date(int(ano),int(mes),int(dia))
+                num = str(data.weekday())
+                edit = dict_dias_semana[num]
+                nova_l_data.append( edit + "," + dia)
+        
+        return nova_l_data
+    
     def soma_geral_consumo(self, df, ano, mes):
         lista_somas_consumo = []
         lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV01"]
@@ -54,7 +86,7 @@ class Calc ():
         for i in lista_dependencias:
             x = df[i+"-HP"]
             y = df[i+"-HFP"]
-            res = sum(filter(lambda x: not np.isnan(x) and x >= 0, x))+sum(filter(lambda x: not np.isnan(x) and x >= 0, y))
+            res = sum(filter(lambda x: not pd.isna(x) and x >= 0, x))+sum(filter(lambda x: not pd.isna(x) and x >= 0, y))
             lista_somas_consumo.append(float(f"{res:.0f}"))
 
         soma_total = 0
@@ -73,6 +105,18 @@ class Calc ():
         
         return l_soma_hfp_hp,l_hfp,l_hp
 
+    def soma_diaria_consumo(self,l_hfp,l_hp):
+        for i,valor in enumerate(l_hfp):
+            if pd.isna(valor):
+                l_hfp[i] = 0
+        for i,valor in enumerate(l_hp):
+            if pd.isna(valor):
+                l_hp[i] = 0
+        
+        soma = [x + y for x,y in zip(l_hfp, l_hp)]
+       
+        return soma
+    
     def __init__(self):
         super().__init__()
         pass
