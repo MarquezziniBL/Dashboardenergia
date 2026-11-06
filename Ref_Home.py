@@ -200,9 +200,26 @@ class Container_principal():
             
             self.container1_2 = st.container(key="container1_2")
             with self.container1_2:
-                    with st.expander(label="Análise",expanded=False):
-                        st.markdown(f'<p style="text-align: center;">{self.selecao_opcoes_dependencia}</p>', unsafe_allow_html=True)
+                #Variáveis do container
+                dados = backend.Calc().analise_dados(df_dados_gastomensal,df_dados_anos,self.selecao_opcoes_ano,self.selecao_opcoes_mes, self.selecao_opcoes_dependencia)
+                with st.expander(label="Análise",expanded=False):
+                    st.title(f" Análise de dados da(o) {self.selecao_opcoes_dependencia} em {self.selecao_opcoes_mes.upper()}",anchor=False)
+                    st.markdown(f"<div style='text-align: center'> Consumo </div>",unsafe_allow_html=True)
+                    self.col16,self.col17 = st.columns([1,1],gap="small", vertical_alignment="top" , border=True)
+                    with self.col16:
+                        st.markdown(f"<div style='text-align: center'> Horário Fora de Ponta - HFP </div>",unsafe_allow_html=True)
+                        st.text("")  
+                        st.text(f"HFP = {dados["mes_atual"]["hfp"][2]} KWh")
+                        st.text(f" Maior Consumo HFP:  {dados["mes_atual"]["hfp"][1]} KWh e Menor Consumo: {dados["mes_atual"]["hfp"][0]} KWh")
+                        
+                    with self.col17:
+                        st.markdown(f"<div style='text-align: center'> Horário de Ponta - HP </div>",unsafe_allow_html=True)
+                        st.text("")
+                        st.text(f"HP = {dados["mes_atual"]["hp"][2]} KWh") 
+                        st.text(f" Maior Consumo HP:  {dados["mes_atual"]["hp"][1]} KWh e Menor Consumo: {dados["mes_atual"]["hp"][0]} KWh")
+                        
         self.local_css(pathlib.Path("assets//style_copy.css"))
+        
 class App():
     # Implementação do CSS
     def local_css(self,filename):
