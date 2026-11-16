@@ -66,26 +66,29 @@ class Container_principal():
         self.container = st.container(border=True, key="container0")
         with self.container:
                 with st.container(border=False, key="container0_1"):
-                    col7, col8= st.columns([1,3],gap="small", vertical_alignment="center" )
-                    with col7:
+                    col0, col1= st.columns([1,3],gap="small", vertical_alignment="center" )
+                    with col0:
                         self.selecao_opcoes_ano = st.selectbox("Ano",options= lista_anos,index= lista_anos.index(date.today().year))
                         self.selecao_opcoes_mes = st.selectbox("Mês",options= lista_meses)
                         self.selecao_opcoes_dependencia = st.selectbox("Dependência",options= lista_dependencias)
-                    with col8:
+                    with col1:
                         with st.container(border=False,key="container0_2"):
 
-                            #Indicação da Bandeira do mês
+                            #Variáveis do container
                             indice = list(df_dados_bandeiras[f"{self.selecao_opcoes_ano}"]["MES"]).index(self.selecao_opcoes_mes.upper())
+                            soma_consumo_dependencia, soma_consumo_todas_dependencias = backend.Calc().soma_geral_consumo(df_dados_anos,self.selecao_opcoes_ano,self.selecao_opcoes_mes)
+                            
+                            #Indicação da Bandeira do mês
                             st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes.upper()}: {df_dados_bandeiras[f"{self.selecao_opcoes_ano}"]["BANDEIRA"][indice]} , valor a mais por 100 KWh: {locale.currency(df_dados_bandeiras[f"{self.selecao_opcoes_ano}"]["VALOR"][indice], grouping=True)}")
                              
-                            dados, soma_geral = backend.Calc().soma_geral_consumo(df_dados_anos,self.selecao_opcoes_ano,self.selecao_opcoes_mes)
+                           
                             
                             # Plotagem
-                            fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=dados, hoverinfo= "text",
+                            fig = go.Figure(data=[go.Bar(x=lista_dependencias, y=soma_consumo_dependencia, hoverinfo= "text",
                                             marker_color =["pink","red","blue","green","yellow","gray", "orange","white","purple"],
-                                            text=dados)])
+                                            text=soma_consumo_dependencia)])
                             fig.update_layout(
-                                    title=f"Consumo geral: {locale.format_string("%.0f",soma_geral, grouping=True)} KWh",
+                                    title=f"Consumo geral: {locale.format_string("%.0f",soma_consumo_todas_dependencias, grouping=True)} KWh",
                                     title_x = 0.3,
                                     xaxis_title = "Dependências",
                                     yaxis_title="Consumo",
@@ -95,20 +98,30 @@ class Container_principal():
 
                             #Percentual representativo de cada dependência
                             texto = ""  
-                            for i, dependencia in enumerate(lista_dependencias):
-                                texto += f"{dependencia}: {locale.format_string("%.2f%%",(dados[i]/soma_geral)*100)}   "
-                            st.text(texto)
+                            try:
+                                for i, dependencia in enumerate(lista_dependencias):
+                                    texto += f"{dependencia}: {locale.format_string("%.2f%%",(soma_consumo_dependencia[i]/ soma_consumo_todas_dependencias)*100)}   "
+                                st.text(texto)
+                            except Exception as e:
+                                st.error(f"ERROR 003: {e} \r- Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
         
         # Container para os dados de cada depedência
         self.container1 = st.container(key="container1") 
         with self.container1:
+            #Variáveis do container
+            dados_diarios_hfp = df_dados_anos[f"{self.selecao_opcoes_ano}"][f"{self.selecao_opcoes_mes}"][f"{self.selecao_opcoes_dependencia}-HFP"]
+            dados_diarios_hp = df_dados_anos[f"{self.selecao_opcoes_ano}"][f"{self.selecao_opcoes_mes}"][f"{self.selecao_opcoes_dependencia}-HP"]
+            l_data = backend.Calc().mudar_formato_data(df_dados_anos[f"{self.selecao_opcoes_ano}"][f"{self.selecao_opcoes_mes}"]["Data"])
+
             l_soma_hfp_hp,l_hfp,l_hp = backend.Calc().soma_geral_valor(df_dados_gastomensal,self.selecao_opcoes_ano,self.selecao_opcoes_dependencia)
+            soma_diaria_hfp_hp = backend.Calc().soma_diaria_consumo(dados_diarios_hfp,dados_diarios_hp)
+            
+            
             st.markdown(f"<h3 style='text-align: center'> Dados do(a) {self.selecao_opcoes_dependencia} </h3>",unsafe_allow_html=True)
             
-            col12,col13 = st.columns([6,1],gap="small", vertical_alignment="center" )
-            
             # Gráfico de Gasto Mensal
-            with col12:
+            col2,col3 = st.columns([6,2],gap="small", vertical_alignment="center" )
+            with col2:
                 barra_custo_hfp = go.Bar(x=lista_meses, y=l_hfp, name="HFP", marker_color = "#00a2ff", hoverinfo= "text",
                                                 hovertext=[locale.currency(n, grouping=True) for n in l_hfp])
                 barra_custo_hp = go.Bar(x=lista_meses, y=l_hp, name = "HP", marker_color = "#ff6600", hoverinfo= "text",
@@ -128,7 +141,7 @@ class Container_principal():
                                         )
                 st.plotly_chart(self.fig_custo, width="stretch")
                     
-            with col13:
+            with col3:
                 pizza_custo = go.Pie(labels=["",""],values=[sum(l_hfp), sum(l_hp)], showlegend=False,
                                     title="Percentual HFP x HP", hoverinfo= "text",
                                     hovertext=[(locale.currency(sum(l_hfp), grouping=True)) , (locale.currency(sum(l_hp), grouping=True))])
@@ -140,8 +153,156 @@ class Container_principal():
                             hovermode = "x unified",
                         )
                 st.plotly_chart(fig_pizza_custo)
-        
+
+            col4,col5 = st.columns([6,2],gap="small", vertical_alignment="center" )
+            with col4:
+                barra_consumo_hfp = go.Bar(x=l_data, y=dados_diarios_hfp, name="HFP", marker_color = "#00a2ff", hoverinfo= "text", 
+                            hovertext=[locale.format_string("%.0f",n, grouping=True) for n in dados_diarios_hfp])
+                barra_consumo_hp = go.Bar(x=l_data, y=dados_diarios_hp, name = "HP", marker_color = "#ff6600",  hoverinfo= "text",
+                            hovertext=[locale.format_string("%.0f",n, grouping=True) for n in dados_diarios_hp])
+                linha_consumo_soma = go.Scatter(x=l_data, y=soma_diaria_hfp_hp, name="HFP + HP" ,mode="markers+lines", hoverinfo= "text", 
+                            hovertext=[locale.format_string("%.0f",n, grouping=True) for n in soma_diaria_hfp_hp],
+                            marker=dict(size=6, symbol="circle", color = "red"), line=dict(width=3,color= "red"))
+                fig_consumo = go.Figure(data=[barra_consumo_hfp,barra_consumo_hp,linha_consumo_soma])
+                fig_consumo.update_layout(
+                                    title={"text":f"Consumo diário de {str(self.selecao_opcoes_mes).lower()}",
+                                        "x":0.1,"y":0.9,"xanchor" : "left", "yanchor":"top"},
+                                    yaxis = dict(title="Consumo", tickformat=',.0f'),
+                                    xaxis = dict(title="Data"),
+                                    plot_bgcolor = "#b6d5ee",
+                                    paper_bgcolor = "#006494",
+                                    hovermode = "x unified",
+                                    )
+                st.plotly_chart(fig_consumo, width="stretch")
+
+            with col5:
+                pizza_consumo = go.Pie(labels=["",""],values=[sum(dados_diarios_hfp), sum(dados_diarios_hp)], showlegend=False,
+                                    title="Percentual HFP x HP", hoverinfo= "text",
+                                    hovertext=[(locale.format_string("%.0f",sum(dados_diarios_hfp), grouping=True)) , (locale.format_string("%.0f",sum(dados_diarios_hp), grouping=True))])
+                fig_pizza_consumo = go.Figure(data=[pizza_consumo])
+                fig_pizza_consumo.update_traces(marker=dict(colors=["#00a2ff","#ff6600"],
+                            line = dict(color = "#FFFFFF", width=1)), textfont_size = 12)
+                fig_pizza_consumo.update_layout(
+                            paper_bgcolor = "#006494",
+                        )
+                st.plotly_chart(fig_pizza_consumo, key="pizza_consumo")
+            
+            self.container1_1 = st.container(key="container1_1", border=True)
+            with self.container1_1:
+                col6,col7 = st.columns([1,9],gap="small", vertical_alignment="center" )
+                with col6:
+                    self.selecao_dias_semana = st.selectbox("Dia da Semana",options= l_data,key="dias_semana")
+                
+                with col7:
+                    #Variáveis do container
+                    atividade = backend.Calc().atividades_mes_atual(l_data.index(self.selecao_dias_semana),df_dados_anos[f"{self.selecao_opcoes_ano}"][f"{self.selecao_opcoes_mes}"]["ATIVIDADES"])
+                    st.markdown(f'<p style="text-align: left;">{atividade}</p>', unsafe_allow_html=True)
+            
+            self.container1_2 = st.container(key="container1_2")
+            with self.container1_2:
+                #Variáveis do container
+                try:
+                    dados = backend.Calc().analise_dados(df_dados_gastomensal,df_dados_anos,self.selecao_opcoes_ano,self.selecao_opcoes_mes, self.selecao_opcoes_dependencia)
+
+                    with st.expander(label="Análise",expanded=False):
+                        st.title(f" Análise de dados da(o) {self.selecao_opcoes_dependencia} em {self.selecao_opcoes_mes.upper()}",anchor=False)
+                        st.markdown(f"<div style='text-align: center'> Consumo </div>",unsafe_allow_html=True)
+                        self.col16,self.col17 = st.columns([1,1],gap="small", vertical_alignment="top" , border=True)
+                        with self.col16:
+                            st.markdown(f"<div style='text-align: center'> Horário Fora de Ponta - HFP </div>",unsafe_allow_html=True)
+                            st.text("")  
+                            with st.container(key="container1_2_1"):
+                                self.col18,self.col19,self.col20 = st.columns([1,1,1],gap="small", vertical_alignment="top" , border= True)
+                                
+                                with self.col18:
+                                    st.markdown(f"<div style='text-align: center'> Mês anterior </div>",unsafe_allow_html=True)
+                                    st.text("")
+                                    st.text(f" Total = {dados["mes_anterior"]["hfp"][2]} KWh") 
+                                    st.text(f" Maior Consumo:  {dados["mes_anterior"]["hfp"][1]} KWh")
+                                    st.text(f" Menor Consumo: {dados["mes_anterior"]["hfp"][0]} KWh")
+                                    st.text(f" Média de consumo: {dados["mes_anterior"]["hfp"][3]} KWh")
+                                
+                                with self.col19:
+                                    st.markdown(f"<div style='text-align: center'> Mês atual </div>",unsafe_allow_html=True)
+                                    st.text("")
+                                    st.text(f"Total = {dados["mes_atual"]["hfp"][2]} KWh")
+                                    st.text(f" Maior Consumo:  {dados["mes_atual"]["hfp"][1]} KWh")
+                                    st.text(f" Menor Consumo: {dados["mes_atual"]["hfp"][0]} KWh")
+                                    st.text(f" Média de consumo: {dados["mes_atual"]["hfp"][3]} KWh")
+
+
+                                with self.col20:
+                                    st.markdown(f"<div style='text-align: center'> Variação </div>",unsafe_allow_html=True)
+                                    st.text("")
+
+                                    var_total_hfp = ((1.0-(float(dados["mes_anterior"]["hfp"][2])+0.000000000001)/(float(dados["mes_atual"]["hfp"][2])+0.000000000001)))*100
+                                    var_maior_consumo_hfp = ((1.0-(float(dados["mes_anterior"]["hfp"][1])+0.000000000001)/(float(dados["mes_atual"]["hfp"][1])+0.000000000001)))*100
+                                    var_menor_consumo_hfp = ((1.0-(float(dados["mes_anterior"]["hfp"][0])+0.000000000001)/(float(dados["mes_atual"]["hfp"][0])+0.000000000001)))*100
+                                    var_media_consumo_hfp = ((1.0-(float(dados["mes_anterior"]["hfp"][3])+0.000000000001)/(float(dados["mes_atual"]["hfp"][3])+0.000000000001)))*100
+                                    
+                                    l_check_hfp = [float(dados["mes_atual"]["hp"][0]),float(dados["mes_atual"]["hfp"][1]),float(dados["mes_atual"]["hfp"][2]),float(dados["mes_atual"]["hp"][3])]
+
+                                    if sum(l_check_hfp) == 0:
+                                        var_total_hfp = 0
+                                        var_maior_consumo_hfp = 0
+                                        var_menor_consumo_hfp = 0 
+                                        var_media_consumo_hfp = 0
+
+                                    st.text(f" Total = {locale.format_string("%.0f",var_total_hfp,grouping=True)} %")
+                                    st.text(f" Maior Consumo:  {locale.format_string("%.0f",var_maior_consumo_hfp,grouping=True)} %")
+                                    st.text(f" Menor Consumo:  {locale.format_string("%.0f",var_menor_consumo_hfp,grouping=True)} %")
+                                    st.text(f" Média Consumo:  {locale.format_string("%.0f",var_media_consumo_hfp,grouping=True)} %")
+
+                            
+                        with self.col17:
+                            st.markdown(f"<div style='text-align: center'> Horário de Ponta - HP </div>",unsafe_allow_html=True)
+                            st.text("")
+                            with st.container(key="container1_2_2"):
+                                self.col21,self.col22,self.col23 = st.columns([1,1,1],gap="small", vertical_alignment="top" , border= True)
+
+                                with self.col21:
+                                    st.markdown(f"<div style='text-align: center'> Mês anterior </div>",unsafe_allow_html=True)
+                                    st.text("")
+                                    st.text(f" Total = {dados["mes_anterior"]["hp"][2]} KWh") 
+                                    st.text(f" Maior Consumo:  {dados["mes_anterior"]["hp"][1]} KWh")
+                                    st.text(f" Menor Consumo: {dados["mes_anterior"]["hp"][0]} KWh")
+                                    st.text(f" Média de consumo: {dados["mes_anterior"]["hp"][3]} KWh")
+                                
+                                with self.col22:
+                                    st.markdown(f"<div style='text-align: center'> Mês atual </div>",unsafe_allow_html=True)
+                                    st.text("")
+                                    st.text(f" Total = {dados["mes_atual"]["hp"][2]} KWh") 
+                                    st.text(f" Maior Consumo:  {dados["mes_atual"]["hp"][1]} KWh")
+                                    st.text(f" Menor Consumo: {dados["mes_atual"]["hp"][0]} KWh")
+                                    st.text(f" Média de consumo: {dados["mes_atual"]["hp"][3]} KWh")
+
+                                with self.col23:
+                                    st.markdown(f"<div style='text-align: center'> Variação </div>",unsafe_allow_html=True)
+                                    st.text("")
+
+                                    var_total_hp = ((1.0-(float(dados["mes_anterior"]["hp"][2])+0.000000000001)/(float(dados["mes_atual"]["hp"][2])+0.000000000001)))*100
+                                    var_maior_consumo_hp = ((1.0-(float(dados["mes_anterior"]["hp"][1])+0.000000000001)/(float(dados["mes_atual"]["hp"][1])+0.000000000001)))*100
+                                    var_menor_consumo_hp = ((1.0-(float(dados["mes_anterior"]["hp"][0])+0.000000000001)/(float(dados["mes_atual"]["hp"][0])+0.000000000001)))*100
+                                    var_media_consumo_hp = ((1.0-(float(dados["mes_anterior"]["hp"][3])+0.000000000001)/(float(dados["mes_atual"]["hp"][3])+0.000000000001)))*100
+                                    
+                                    l_check_hp = [float(dados["mes_atual"]["hp"][0]),float(dados["mes_atual"]["hp"][1]),float(dados["mes_atual"]["hp"][2]),float(dados["mes_atual"]["hp"][3])]
+
+                                    if sum(l_check_hp) == 0:
+                                        var_total_hp = 0
+                                        var_maior_consumo_hp = 0
+                                        var_menor_consumo_hp = 0 
+                                        var_media_consumo_hp = 0
+
+                                    st.text(f" Total = {locale.format_string("%.0f",var_total_hp,grouping=True)} %")
+                                    st.text(f" Maior Consumo:  {locale.format_string("%.0f",var_maior_consumo_hp,grouping=True)} %")
+                                    st.text(f" Menor Consumo:  {locale.format_string("%.0f",var_menor_consumo_hp,grouping=True)} %")
+                                    st.text(f" Média Consumo:  {locale.format_string("%.0f",var_media_consumo_hp,grouping=True)} %")
+                except TypeError as e:
+                    st.error(f"ERROR 002: {e} \r- Dados com formatação errada em  {self.selecao_opcoes_mes} {self.selecao_opcoes_ano}")
+                                        
+    
         self.local_css(pathlib.Path("assets//style_copy.css"))
+        
 class App():
     # Implementação do CSS
     def local_css(self,filename):
@@ -155,12 +316,12 @@ class App():
         df_dados_bandeiras = {}
         df_dados_gastomensal = {}
 
-        #try:
-        df_dados_consumo = backend.Calc().dados_consumo()
-        df_dados_bandeiras = backend.Calc().dados_bandeiras()
-        df_dados_gastomensal = backend.Calc().dados_gastomensal()
-        #except Exception:
-            #st.error("Erro ao conectar com Banco de Dados")
+        try:
+            df_dados_consumo = backend.Calc().dados_consumo()
+            df_dados_bandeiras = backend.Calc().dados_bandeiras()
+            df_dados_gastomensal = backend.Calc().dados_gastomensal()
+        except Exception as e:
+            st.error(f"ERROR 001: {e} \r -Erro ao conectar com Banco de Dados")
         
         self.titulo_pagina = st.set_page_config(page_title="Dashboard", layout="wide",
             initial_sidebar_state="collapsed")

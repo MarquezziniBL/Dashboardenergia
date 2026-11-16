@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
-from datetime import date
+from datetime import date, datetime
 import calendar
 from scripts import consulta_bd as consbd
+import locale
+
 
 class Calc ():
 
@@ -46,7 +48,39 @@ class Calc ():
             dict_dados[f"{i}"] = dados
         
         return dict_dados
+    
     #FUNÇÕES DE TRATAMENTO DE DADOS
+
+    def atividades_mes_atual(self,posicao,l_atividades):
+        texto = ""
+        atividades = str(l_atividades[posicao]).split(",")
+        x = 1
+        for i in atividades:
+            if i == "None":
+                i = "SEM ATIVIDADES"
+            else:
+                i = f"{x} - {i}  "
+            
+            texto += i
+            x += 1
+        
+        return texto
+
+    def mudar_formato_data(self, l_data_data):
+        nova_l_data = []
+        dict_dias_semana = {"0":"Seg","1":"Ter","2":"Qua","3":"Qui","4":"Sex","5":"Sáb","6":"Dom"}
+
+        for i in l_data_data:
+                data_editar = str(i).replace("/","-")  
+                l_data= data_editar.split(sep ="-",maxsplit=3)
+                dia,mes,ano = l_data[0],l_data[len(l_data)//2],l_data[-1]
+                data = date(int(ano),int(mes),int(dia))
+                num = str(data.weekday())
+                edit = dict_dias_semana[num]
+                nova_l_data.append( edit + "," + dia)
+        
+        return nova_l_data
+    
     def soma_geral_consumo(self, df, ano, mes):
         lista_somas_consumo = []
         lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV01"]
@@ -54,7 +88,7 @@ class Calc ():
         for i in lista_dependencias:
             x = df[i+"-HP"]
             y = df[i+"-HFP"]
-            res = sum(filter(lambda x: not np.isnan(x) and x >= 0, x))+sum(filter(lambda x: not np.isnan(x) and x >= 0, y))
+            res = sum(filter(lambda x: not pd.isna(x) and x >= 0, x))+sum(filter(lambda x: not pd.isna(x) and x >= 0, y))
             lista_somas_consumo.append(float(f"{res:.0f}"))
 
         soma_total = 0
@@ -73,6 +107,82 @@ class Calc ():
         
         return l_soma_hfp_hp,l_hfp,l_hp
 
+    def soma_diaria_consumo(self,l_hfp,l_hp):
+        for i,valor in enumerate(l_hfp):
+            if pd.isna(valor):
+                l_hfp[i] = 0
+        for i,valor in enumerate(l_hp):
+            if pd.isna(valor):
+                l_hp[i] = 0
+        
+        soma = [x + y for x,y in zip(l_hfp, l_hp)]
+       
+        return soma
+    
+    def analise_dados(self,df_gastomensal,df_consumo,ano,mes, dependencia):
+
+        locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
+
+        lista_anos,lista_meses, lista_dependencias = self.dados_selectbox()
+
+        ano_ant = 2026
+        mes_ant = lista_meses[lista_meses.index(mes)-1]
+        if mes == "janeiro":
+            ano_ant = ano - 1
+            mes_ant = "dezembro"
+
+        #Dados HP
+        consumo_mes_atual_hp = df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HP"]
+        media_consumo_mes_atual_hp = (sum(df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HP"])/len(df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HP"]))
+        consumo_mes_atual_hfp = df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HFP"]
+        media_consumo_mes_atual_hfp = (sum(df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HFP"])/len(df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HFP"]))
+        
+        #Dados HFP
+        consumo_mes_anterior_hp = df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HP"]
+        media_consumo_mes_anterior_hp = (sum(df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HP"])/len(df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HP"]))
+        consumo_mes_anterior_hfp = df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HFP"]
+        media_consumo_mes_anterior_hfp = (sum(df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HFP"])/len(df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HFP"]))
+        
+        #Dados do mês atual
+        total_soma_consumo_mes_atual = locale.format_string("%.0f",float(sum(consumo_mes_atual_hp) + (sum(consumo_mes_atual_hfp))),grouping=True)
+        
+        soma_consumo_mes_atual_hp = locale.format_string("%.0f",float(sum(consumo_mes_atual_hp)),grouping=True)
+        valor_max_mes_atual_hp = locale.format_string("%.0f",float(max(consumo_mes_atual_hp)),grouping=True)
+        valor_min_mes_atual_hp = locale.format_string("%.0f",float(min(consumo_mes_atual_hp)),grouping=True)
+
+        soma_consumo_mes_atual_hfp = locale.format_string("%.0f",float(sum(consumo_mes_atual_hfp)),grouping=True)
+        valor_max_mes_atual_hfp = locale.format_string("%.0f",float(max(consumo_mes_atual_hfp)),grouping=True)
+        valor_min_mes_atual_hfp = locale.format_string("%.0f",float(min(consumo_mes_atual_hfp)),grouping=True)
+
+        media_consumo_mes_atual_hp = locale.format_string("%.0f",float(media_consumo_mes_atual_hp),grouping=True)
+        media_consumo_mes_atual_hfp = locale.format_string("%.0f",float(media_consumo_mes_atual_hfp),grouping=True)
+
+        #Dados do mês anterior
+        total_soma_consumo_mes_anterior = locale.format_string("%.0f",float(sum(consumo_mes_anterior_hp) + sum(consumo_mes_anterior_hfp)),grouping=True)
+
+        soma_consumo_mes_anterior_hp = locale.format_string("%.0f",float(sum(consumo_mes_anterior_hp)),grouping=True)
+        valor_max_mes_anterior_hp = locale.format_string("%.0f",float(max(consumo_mes_anterior_hp)),grouping=True)
+        valor_min_mes_anterior_hp = locale.format_string("%.0f",float(min(consumo_mes_anterior_hp)),grouping=True)
+
+        soma_consumo_mes_anterior_hfp = locale.format_string("%.0f",float(sum(consumo_mes_anterior_hfp)),grouping=True)
+        valor_max_mes_anterior_hfp = locale.format_string("%.0f",float(max(consumo_mes_anterior_hfp)),grouping=True)
+        valor_min_mes_anterior_hfp = locale.format_string("%.0f",float(min(consumo_mes_anterior_hfp)),grouping=True)
+
+        media_consumo_mes_anterior_hp = locale.format_string("%.0f",float(media_consumo_mes_anterior_hp),grouping=True)
+        media_consumo_mes_anterior_hfp= locale.format_string("%.0f",float(media_consumo_mes_anterior_hfp),grouping=True)
+
+        dict_dados = {
+            "mes_atual": {"totais":[total_soma_consumo_mes_atual],
+                        "hp":[valor_min_mes_atual_hp,valor_max_mes_atual_hp,soma_consumo_mes_atual_hp,media_consumo_mes_atual_hp],
+                        "hfp": [valor_min_mes_atual_hfp,valor_max_mes_atual_hfp,soma_consumo_mes_atual_hfp,media_consumo_mes_atual_hfp]},
+        
+            "mes_anterior": {"totais":[total_soma_consumo_mes_anterior],
+                              "hp":[valor_min_mes_anterior_hp,valor_max_mes_anterior_hp, soma_consumo_mes_anterior_hp,media_consumo_mes_anterior_hp],
+                              "hfp": [valor_min_mes_anterior_hfp,valor_max_mes_anterior_hfp, soma_consumo_mes_anterior_hfp,media_consumo_mes_anterior_hfp]  }
+            
+            }
+
+        return dict_dados
     def __init__(self):
         super().__init__()
         pass
