@@ -123,18 +123,29 @@ class Calc ():
 
         locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-        ano_ant = 0
+        lista_anos,lista_meses, lista_dependencias = self.dados_selectbox()
+
+        ano_ant = 2026
+        mes_ant = lista_meses[lista_meses.index(mes)-1]
         if mes == "janeiro":
             ano_ant = ano - 1
             mes_ant = "dezembro"
 
+        #Dados HP
         consumo_mes_atual_hp = df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HP"]
+        media_consumo_mes_atual_hp = (sum(df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HP"])/len(df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HP"]))
         consumo_mes_atual_hfp = df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HFP"]
+        media_consumo_mes_atual_hfp = (sum(df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HFP"])/len(df_consumo[f"{ano}"][f"{mes}"][f"{dependencia}-HFP"]))
+        
+        #Dados HFP
         consumo_mes_anterior_hp = df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HP"]
+        media_consumo_mes_anterior_hp = (sum(df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HP"])/len(df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HP"]))
         consumo_mes_anterior_hfp = df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HFP"]
-
+        media_consumo_mes_anterior_hfp = (sum(df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HFP"])/len(df_consumo[f"{ano_ant}"][f"{mes_ant}"][f"{dependencia}-HFP"]))
+        
         #Dados do mês atual
         total_soma_consumo_mes_atual = locale.format_string("%.0f",float(sum(consumo_mes_atual_hp) + (sum(consumo_mes_atual_hfp))),grouping=True)
+        
         soma_consumo_mes_atual_hp = locale.format_string("%.0f",float(sum(consumo_mes_atual_hp)),grouping=True)
         valor_max_mes_atual_hp = locale.format_string("%.0f",float(max(consumo_mes_atual_hp)),grouping=True)
         valor_min_mes_atual_hp = locale.format_string("%.0f",float(min(consumo_mes_atual_hp)),grouping=True)
@@ -142,6 +153,9 @@ class Calc ():
         soma_consumo_mes_atual_hfp = locale.format_string("%.0f",float(sum(consumo_mes_atual_hfp)),grouping=True)
         valor_max_mes_atual_hfp = locale.format_string("%.0f",float(max(consumo_mes_atual_hfp)),grouping=True)
         valor_min_mes_atual_hfp = locale.format_string("%.0f",float(min(consumo_mes_atual_hfp)),grouping=True)
+
+        media_consumo_mes_atual_hp = locale.format_string("%.0f",float(media_consumo_mes_atual_hp),grouping=True)
+        media_consumo_mes_atual_hfp = locale.format_string("%.0f",float(media_consumo_mes_atual_hfp),grouping=True)
 
         #Dados do mês anterior
         total_soma_consumo_mes_anterior = locale.format_string("%.0f",float(sum(consumo_mes_anterior_hp) + sum(consumo_mes_anterior_hfp)),grouping=True)
@@ -154,14 +168,17 @@ class Calc ():
         valor_max_mes_anterior_hfp = locale.format_string("%.0f",float(max(consumo_mes_anterior_hfp)),grouping=True)
         valor_min_mes_anterior_hfp = locale.format_string("%.0f",float(min(consumo_mes_anterior_hfp)),grouping=True)
 
+        media_consumo_mes_anterior_hp = locale.format_string("%.0f",float(media_consumo_mes_anterior_hp),grouping=True)
+        media_consumo_mes_anterior_hfp= locale.format_string("%.0f",float(media_consumo_mes_anterior_hfp),grouping=True)
+
         dict_dados = {
             "mes_atual": {"totais":[total_soma_consumo_mes_atual],
-                        "hp":[valor_min_mes_atual_hp,valor_max_mes_atual_hp,soma_consumo_mes_atual_hp],
-                        "hfp": [valor_min_mes_atual_hfp,valor_max_mes_atual_hfp,soma_consumo_mes_atual_hfp]},
+                        "hp":[valor_min_mes_atual_hp,valor_max_mes_atual_hp,soma_consumo_mes_atual_hp,media_consumo_mes_atual_hp],
+                        "hfp": [valor_min_mes_atual_hfp,valor_max_mes_atual_hfp,soma_consumo_mes_atual_hfp,media_consumo_mes_atual_hfp]},
         
             "mes_anterior": {"totais":[total_soma_consumo_mes_anterior],
-                              "hp":[valor_min_mes_anterior_hp,valor_max_mes_anterior_hp, soma_consumo_mes_anterior_hp],
-                              "hfp": [valor_min_mes_anterior_hfp,valor_max_mes_anterior_hfp, soma_consumo_mes_anterior_hfp]  }
+                              "hp":[valor_min_mes_anterior_hp,valor_max_mes_anterior_hp, soma_consumo_mes_anterior_hp,media_consumo_mes_anterior_hp],
+                              "hfp": [valor_min_mes_anterior_hfp,valor_max_mes_anterior_hfp, soma_consumo_mes_anterior_hfp,media_consumo_mes_anterior_hfp]  }
             
             }
 

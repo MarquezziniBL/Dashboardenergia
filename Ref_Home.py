@@ -102,8 +102,8 @@ class Container_principal():
                                 for i, dependencia in enumerate(lista_dependencias):
                                     texto += f"{dependencia}: {locale.format_string("%.2f%%",(soma_consumo_dependencia[i]/ soma_consumo_todas_dependencias)*100)}   "
                                 st.text(texto)
-                            except Exception:
-                                st.error(f"Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
+                            except Exception as e:
+                                st.error(f"ERROR 003: {e} \r- Provavelmente a planilha do mês de {self.selecao_opcoes_mes} está vazia", width=500)
         
         # Container para os dados de cada depedência
         self.container1 = st.container(key="container1") 
@@ -201,23 +201,106 @@ class Container_principal():
             self.container1_2 = st.container(key="container1_2")
             with self.container1_2:
                 #Variáveis do container
-                dados = backend.Calc().analise_dados(df_dados_gastomensal,df_dados_anos,self.selecao_opcoes_ano,self.selecao_opcoes_mes, self.selecao_opcoes_dependencia)
-                with st.expander(label="Análise",expanded=False):
-                    st.title(f" Análise de dados da(o) {self.selecao_opcoes_dependencia} em {self.selecao_opcoes_mes.upper()}",anchor=False)
-                    st.markdown(f"<div style='text-align: center'> Consumo </div>",unsafe_allow_html=True)
-                    self.col16,self.col17 = st.columns([1,1],gap="small", vertical_alignment="top" , border=True)
-                    with self.col16:
-                        st.markdown(f"<div style='text-align: center'> Horário Fora de Ponta - HFP </div>",unsafe_allow_html=True)
-                        st.text("")  
-                        st.text(f"HFP = {dados["mes_atual"]["hfp"][2]} KWh")
-                        st.text(f" Maior Consumo HFP:  {dados["mes_atual"]["hfp"][1]} KWh e Menor Consumo: {dados["mes_atual"]["hfp"][0]} KWh")
-                        
-                    with self.col17:
-                        st.markdown(f"<div style='text-align: center'> Horário de Ponta - HP </div>",unsafe_allow_html=True)
-                        st.text("")
-                        st.text(f"HP = {dados["mes_atual"]["hp"][2]} KWh") 
-                        st.text(f" Maior Consumo HP:  {dados["mes_atual"]["hp"][1]} KWh e Menor Consumo: {dados["mes_atual"]["hp"][0]} KWh")
-                        
+                try:
+                    dados = backend.Calc().analise_dados(df_dados_gastomensal,df_dados_anos,self.selecao_opcoes_ano,self.selecao_opcoes_mes, self.selecao_opcoes_dependencia)
+
+                    with st.expander(label="Análise",expanded=False):
+                        st.title(f" Análise de dados da(o) {self.selecao_opcoes_dependencia} em {self.selecao_opcoes_mes.upper()}",anchor=False)
+                        st.markdown(f"<div style='text-align: center'> Consumo </div>",unsafe_allow_html=True)
+                        self.col16,self.col17 = st.columns([1,1],gap="small", vertical_alignment="top" , border=True)
+                        with self.col16:
+                            st.markdown(f"<div style='text-align: center'> Horário Fora de Ponta - HFP </div>",unsafe_allow_html=True)
+                            st.text("")  
+                            with st.container(key="container1_2_1"):
+                                self.col18,self.col19,self.col20 = st.columns([1,1,1],gap="small", vertical_alignment="top" , border= True)
+                                
+                                with self.col18:
+                                    st.markdown(f"<div style='text-align: center'> Mês anterior </div>",unsafe_allow_html=True)
+                                    st.text("")
+                                    st.text(f" Total = {dados["mes_anterior"]["hfp"][2]} KWh") 
+                                    st.text(f" Maior Consumo:  {dados["mes_anterior"]["hfp"][1]} KWh")
+                                    st.text(f" Menor Consumo: {dados["mes_anterior"]["hfp"][0]} KWh")
+                                    st.text(f" Média de consumo: {dados["mes_anterior"]["hfp"][3]} KWh")
+                                
+                                with self.col19:
+                                    st.markdown(f"<div style='text-align: center'> Mês atual </div>",unsafe_allow_html=True)
+                                    st.text("")
+                                    st.text(f"Total = {dados["mes_atual"]["hfp"][2]} KWh")
+                                    st.text(f" Maior Consumo:  {dados["mes_atual"]["hfp"][1]} KWh")
+                                    st.text(f" Menor Consumo: {dados["mes_atual"]["hfp"][0]} KWh")
+                                    st.text(f" Média de consumo: {dados["mes_atual"]["hfp"][3]} KWh")
+
+
+                                with self.col20:
+                                    st.markdown(f"<div style='text-align: center'> Variação </div>",unsafe_allow_html=True)
+                                    st.text("")
+
+                                    var_total_hfp = ((1.0-(float(dados["mes_anterior"]["hfp"][2])+0.000000000001)/(float(dados["mes_atual"]["hfp"][2])+0.000000000001)))*100
+                                    var_maior_consumo_hfp = ((1.0-(float(dados["mes_anterior"]["hfp"][1])+0.000000000001)/(float(dados["mes_atual"]["hfp"][1])+0.000000000001)))*100
+                                    var_menor_consumo_hfp = ((1.0-(float(dados["mes_anterior"]["hfp"][0])+0.000000000001)/(float(dados["mes_atual"]["hfp"][0])+0.000000000001)))*100
+                                    var_media_consumo_hfp = ((1.0-(float(dados["mes_anterior"]["hfp"][3])+0.000000000001)/(float(dados["mes_atual"]["hfp"][3])+0.000000000001)))*100
+                                    
+                                    l_check_hfp = [float(dados["mes_atual"]["hp"][0]),float(dados["mes_atual"]["hfp"][1]),float(dados["mes_atual"]["hfp"][2]),float(dados["mes_atual"]["hp"][3])]
+
+                                    if sum(l_check_hfp) == 0:
+                                        var_total_hfp = 0
+                                        var_maior_consumo_hfp = 0
+                                        var_menor_consumo_hfp = 0 
+                                        var_media_consumo_hfp = 0
+
+                                    st.text(f" Total = {locale.format_string("%.0f",var_total_hfp,grouping=True)} %")
+                                    st.text(f" Maior Consumo:  {locale.format_string("%.0f",var_maior_consumo_hfp,grouping=True)} %")
+                                    st.text(f" Menor Consumo:  {locale.format_string("%.0f",var_menor_consumo_hfp,grouping=True)} %")
+                                    st.text(f" Média Consumo:  {locale.format_string("%.0f",var_media_consumo_hfp,grouping=True)} %")
+
+                            
+                        with self.col17:
+                            st.markdown(f"<div style='text-align: center'> Horário de Ponta - HP </div>",unsafe_allow_html=True)
+                            st.text("")
+                            with st.container(key="container1_2_2"):
+                                self.col21,self.col22,self.col23 = st.columns([1,1,1],gap="small", vertical_alignment="top" , border= True)
+
+                                with self.col21:
+                                    st.markdown(f"<div style='text-align: center'> Mês anterior </div>",unsafe_allow_html=True)
+                                    st.text("")
+                                    st.text(f" Total = {dados["mes_anterior"]["hp"][2]} KWh") 
+                                    st.text(f" Maior Consumo:  {dados["mes_anterior"]["hp"][1]} KWh")
+                                    st.text(f" Menor Consumo: {dados["mes_anterior"]["hp"][0]} KWh")
+                                    st.text(f" Média de consumo: {dados["mes_anterior"]["hp"][3]} KWh")
+                                
+                                with self.col22:
+                                    st.markdown(f"<div style='text-align: center'> Mês atual </div>",unsafe_allow_html=True)
+                                    st.text("")
+                                    st.text(f" Total = {dados["mes_atual"]["hp"][2]} KWh") 
+                                    st.text(f" Maior Consumo:  {dados["mes_atual"]["hp"][1]} KWh")
+                                    st.text(f" Menor Consumo: {dados["mes_atual"]["hp"][0]} KWh")
+                                    st.text(f" Média de consumo: {dados["mes_atual"]["hp"][3]} KWh")
+
+                                with self.col23:
+                                    st.markdown(f"<div style='text-align: center'> Variação </div>",unsafe_allow_html=True)
+                                    st.text("")
+
+                                    var_total_hp = ((1.0-(float(dados["mes_anterior"]["hp"][2])+0.000000000001)/(float(dados["mes_atual"]["hp"][2])+0.000000000001)))*100
+                                    var_maior_consumo_hp = ((1.0-(float(dados["mes_anterior"]["hp"][1])+0.000000000001)/(float(dados["mes_atual"]["hp"][1])+0.000000000001)))*100
+                                    var_menor_consumo_hp = ((1.0-(float(dados["mes_anterior"]["hp"][0])+0.000000000001)/(float(dados["mes_atual"]["hp"][0])+0.000000000001)))*100
+                                    var_media_consumo_hp = ((1.0-(float(dados["mes_anterior"]["hp"][3])+0.000000000001)/(float(dados["mes_atual"]["hp"][3])+0.000000000001)))*100
+                                    
+                                    l_check_hp = [float(dados["mes_atual"]["hp"][0]),float(dados["mes_atual"]["hp"][1]),float(dados["mes_atual"]["hp"][2]),float(dados["mes_atual"]["hp"][3])]
+
+                                    if sum(l_check_hp) == 0:
+                                        var_total_hp = 0
+                                        var_maior_consumo_hp = 0
+                                        var_menor_consumo_hp = 0 
+                                        var_media_consumo_hp = 0
+
+                                    st.text(f" Total = {locale.format_string("%.0f",var_total_hp,grouping=True)} %")
+                                    st.text(f" Maior Consumo:  {locale.format_string("%.0f",var_maior_consumo_hp,grouping=True)} %")
+                                    st.text(f" Menor Consumo:  {locale.format_string("%.0f",var_menor_consumo_hp,grouping=True)} %")
+                                    st.text(f" Média Consumo:  {locale.format_string("%.0f",var_media_consumo_hp,grouping=True)} %")
+                except TypeError as e:
+                    st.error(f"ERROR 002: {e} \r- Dados com formatação errada em  {self.selecao_opcoes_mes} {self.selecao_opcoes_ano}")
+                                        
+    
         self.local_css(pathlib.Path("assets//style_copy.css"))
         
 class App():
@@ -233,12 +316,12 @@ class App():
         df_dados_bandeiras = {}
         df_dados_gastomensal = {}
 
-        #try:
-        df_dados_consumo = backend.Calc().dados_consumo()
-        df_dados_bandeiras = backend.Calc().dados_bandeiras()
-        df_dados_gastomensal = backend.Calc().dados_gastomensal()
-        #except Exception:
-            #st.error("Erro ao conectar com Banco de Dados")
+        try:
+            df_dados_consumo = backend.Calc().dados_consumo()
+            df_dados_bandeiras = backend.Calc().dados_bandeiras()
+            df_dados_gastomensal = backend.Calc().dados_gastomensal()
+        except Exception as e:
+            st.error(f"ERROR 001: {e} \r -Erro ao conectar com Banco de Dados")
         
         self.titulo_pagina = st.set_page_config(page_title="Dashboard", layout="wide",
             initial_sidebar_state="collapsed")
