@@ -13,7 +13,7 @@ class Calc ():
         ano_atual = date.today().year
         lista_anos = list(range(2024,date.today().year+1))
         lista_meses = list(calendar.month_name)[1:]
-        lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV01"]
+        lista_dependencias = ["GLOBALIZADA","SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV01"]
 
         return lista_anos,lista_meses, lista_dependencias
     
@@ -83,7 +83,7 @@ class Calc ():
     
     def soma_geral_consumo(self, df, ano, mes):
         lista_somas_consumo = []
-        lista_dependencias = ["SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV01"]
+        lista_dependencias = ["GLOBALIZADA","SEDE","HTS", "HTO", "ALQQ", "USINA/CICRIN", "FADOR", "CIAFV01"]
         df = df[str(ano)][mes]
         for i in lista_dependencias:
             x = df[i+"-HP"]

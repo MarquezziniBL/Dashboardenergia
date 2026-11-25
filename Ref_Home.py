@@ -40,9 +40,9 @@ class Container_titulo():
     
     def __init__(self, **kwargs):
         super().__init__()
-        versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.0.1.3"
-        atualizacoes = """ V2.0.1.3 - 26/02/2026
-- Lançamento dos dados de FEV/26"""
+        versao = " Desenvolvedor: 2º Sgt Eng Marquezzini - Versão: 2.1.1.3"
+        atualizacoes = """ V2.1.1.3 - 25/11/2026
+- Refatoração e ajuste do backend"""
         
         with st.container(border=False, key= "container_0"):
                 st.markdown("<h1 class = h1_header>Dashboard Controle de Energia</h1>", unsafe_allow_html=True)
@@ -76,8 +76,10 @@ class Container_principal():
 
                             #Variáveis do container
                             indice = list(df_dados_bandeiras[f"{self.selecao_opcoes_ano}"]["MES"]).index(self.selecao_opcoes_mes.upper())
+                            
                             soma_consumo_dependencia, soma_consumo_todas_dependencias = backend.Calc().soma_geral_consumo(df_dados_anos,self.selecao_opcoes_ano,self.selecao_opcoes_mes)
                             
+
                             #Indicação da Bandeira do mês
                             st.write(f"Bandeira para o mês de {self.selecao_opcoes_mes.upper()}: {df_dados_bandeiras[f"{self.selecao_opcoes_ano}"]["BANDEIRA"][indice]} , valor a mais por 100 KWh: {locale.currency(df_dados_bandeiras[f"{self.selecao_opcoes_ano}"]["VALOR"][indice], grouping=True)}")
                              
